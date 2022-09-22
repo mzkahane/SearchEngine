@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An index to store words and the files those words are found in as well as
@@ -128,7 +128,7 @@ public interface InvertedIndex<E> {
 	 * @param word the word to get the location-position map for
 	 * @return a copy of the location-position map for the word in the index
 	 */
-	public HashMap<Path, ArrayList<Integer>> get(String word);
+	public Map<Path, ? extends Collection<? extends Number>> get(String word);
 
 	/**
 	 * Returns a copy of the positions for a word in a given location in the index

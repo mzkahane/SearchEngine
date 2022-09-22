@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Outputs several simple data structures in "pretty" JSON format where newlines
@@ -233,7 +234,7 @@ public class PrettyJsonWriter {
 	 * @see #writeArray(Collection)
 	 */
 	public static void writeNestedArrays(
-			Map<Path, ? extends Collection<? extends Number>> elements,
+			TreeMap<Path, ? extends Collection<? extends Number>> elements,
 			Writer writer, int indent) throws IOException {
 		writer.write("{\n");
 		Set<Path> keys = elements.keySet();
@@ -263,10 +264,10 @@ public class PrettyJsonWriter {
 	 *
 	 * @see Files#newBufferedReader(Path, java.nio.charset.Charset)
 	 * @see StandardCharsets#UTF_8
-	 * @see #writeNestedArrays(Map, Writer, int)
+	 * @see #writeNestedArrays(TreeMap, Writer, int)
 	 */
 	public static void writeNestedArrays(
-			Map<Path, ? extends Collection<? extends Number>> elements, Path path)
+			TreeMap<Path, ? extends Collection<? extends Number>> elements, Path path)
 			throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writeNestedArrays(elements, writer, 0);
@@ -280,10 +281,10 @@ public class PrettyJsonWriter {
 	 * @return a {@link String} containing the elements in pretty JSON format
 	 *
 	 * @see StringWriter
-	 * @see #writeNestedArrays(Map, Writer, int)
+	 * @see #writeNestedArrays(TreeMap, Writer, int)
 	 */
 	public static String writeNestedArrays(
-			Map<Path, ? extends Collection<? extends Number>> elements) {
+			TreeMap<Path, ? extends Collection<? extends Number>> elements) {
 		try {
 			StringWriter writer = new StringWriter();
 			writeNestedArrays(elements, writer, 0);

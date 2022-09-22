@@ -3,7 +3,6 @@ package edu.usfca.cs272;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -54,11 +53,11 @@ public class WordIndex implements InvertedIndex<Path> {
 			ArrayList<Integer> array = temp.get(location);
 			array.add(position);
 
-			index.put(word, temp);
+			index.putIfAbsent(word, temp);
 		} else if (!index.get(word).containsKey(location)) {
 			ArrayList<Integer> array = new ArrayList<Integer>();
 			array.add(position);
-			index.get(word).put(location, array);
+			index.get(word).putIfAbsent(location, array);
 		} else {
 			index.get(word).get(location).add(position);
 		}
@@ -124,8 +123,8 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public HashMap<Path, ArrayList<Integer>> get(String key) {
-		HashMap<Path, ArrayList<Integer>> out = new HashMap<Path, ArrayList<Integer>>(index.get(key));
+	public TreeMap<Path, ? extends Collection<? extends Number>> get(String key) {
+		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(key));
 		return out;
 	}
 

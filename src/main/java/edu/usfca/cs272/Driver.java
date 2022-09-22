@@ -2,15 +2,18 @@ package edu.usfca.cs272;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -37,6 +40,34 @@ public class Driver {
 			index.add(cleanedWords.get(i), path, i+1);
 		}
 	}
+
+	/**
+	 * Finds the file specified by the path, or walks through all of the files in the
+	 * directory if the path points to one
+	 *
+	 * @param textPath the path to find the files
+	 * @param indexPath the path to output the index
+	 * @param index the index to parse the files into
+	 * @throws IOException when an IO error occurs
+	 */
+	public static void findAndInput(Path textPath, Path indexPath, WordIndex index) throws IOException {
+		if (Files.isDirectory(textPath)) {
+			try (Stream<Path> files = Files.walk(textPath)) {
+				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
+				Collections.sort(paths);
+				for (int i = 0; i < paths.size(); i++) {
+					findAndInput(paths.get(i), indexPath, index);
+				}
+			}
+		} else if (Files.isReadable(textPath)) {
+			inputFile(textPath, index);
+			//PrettyJsonWriter.writeIndex(index, indexPath, 0);
+		} else {
+			System.out.println("invalid path");
+			return;
+		}
+	}
+
 	/**
 	 * Initializes the classes necessary based on the provided command-line
 	 * arguments. This includes (but is not limited to) how to build or search an
@@ -49,7 +80,6 @@ public class Driver {
 		// store initial start time
 		Instant start = Instant.now();
 
-		// TODO Fill in and modify as needed
 		System.out.println(Arrays.toString(args));
 
 		ArgumentParser flags = new ArgumentParser();
@@ -59,10 +89,9 @@ public class Driver {
 		}
 
 		WordIndex index = new WordIndex();
-		Path indexPath = Paths.get(".");
+		Path indexPath = Path.of("index.json");
 		Path textPath = null;
 		boolean indexFound = false;
-		boolean textFound = false;
 
 		for (String flag : flags.viewFlags()) {
 			if (Objects.equals(flag, "-index")) {
@@ -71,42 +100,26 @@ public class Driver {
 			}
 			if (Objects.equals(flag, "-text")) {
 				textPath = flags.getPath(flag);
-				textFound = true;
 			}
 			if (!Objects.equals(flag, "-index") && !Objects.equals(flag, "-text")) {
 				throw new UnsupportedOperationException("Flag not supported!");
 			}
 		}
 
-		if (!indexFound || !textFound) {
-			System.out.println("One or more flags missing!");
-			return;
-		}
-
 		if (textPath == null) {
-			System.out.println("No file/directory specified");
+			BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8);
+			writer.write("[]");
 			return;
 		}
 
-
-		if (Files.isReadable(textPath)) {
-			inputFile(textPath, index);
-			PrettyJsonWriter.writeIndex(index, indexPath, 0);
-		} else if (Files.isDirectory(textPath)) {
-			// read each file into wordindex
-			try (Stream<Path> files = Files.walk(textPath)) {
-				var iterator = files.iterator();
-				while (iterator.hasNext()) {
-					inputFile(iterator.next(), index);
-				}
-			}
-
-		} else {
-			System.out.println("invalid path");
+		if (!indexFound) {
 			return;
 		}
 
-		//PrettyJsonWriter.writeIndex(index, indexPath, 0);
+		findAndInput(textPath, indexPath, index);
+
+		//System.out.println(indexPath.toAbsolutePath().toString());
+		PrettyJsonWriter.writeIndex(index, indexPath, 0);
 
 		// calculate time elapsed and output
 		long elapsed = Duration.between(start, Instant.now()).toMillis();
