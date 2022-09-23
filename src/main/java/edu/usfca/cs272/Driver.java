@@ -100,7 +100,7 @@ public class Driver {
 	 * @param args flag/value pairs used to start this program
 	 * @throws IOException if an IO error occurs
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		// store initial start time
 		Instant start = Instant.now();
 
@@ -132,9 +132,14 @@ public class Driver {
 		}
 
 		if (textPath == null) {
-			BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8);
-			writer.write("[]");
-			return;
+			try(BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8)) {
+				writer.write("[]");
+				return;
+			} catch (IOException e) {
+				System.out.println("Could not create writer");
+			}
+
+
 		} else if (Files.isDirectory(textPath)) {
 			isDirectory = true;
 		}
@@ -143,9 +148,17 @@ public class Driver {
 			return;
 		}
 
-		findAndInput(textPath, indexPath, index, isDirectory);
+		try {
+			findAndInput(textPath, indexPath, index, isDirectory);
+		} catch (IOException e) {
+			System.out.println("Could not Walk the file path!");
+		}
 
-		PrettyJsonWriter.writeIndex(index, indexPath, 0);
+		try {
+			PrettyJsonWriter.writeIndex(index, indexPath, 0);
+		} catch (IOException e) {
+			System.out.println("Could not write to this path.");
+		}
 
 		// calculate time elapsed and output
 		long elapsed = Duration.between(start, Instant.now()).toMillis();
