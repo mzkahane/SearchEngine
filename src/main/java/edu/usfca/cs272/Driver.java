@@ -127,7 +127,7 @@ public class Driver {
 				textPath = flags.getPath(flag);
 			}
 			if (!Objects.equals(flag, "-index") && !Objects.equals(flag, "-text")) {
-				throw new UnsupportedOperationException("Flag not supported!");
+				System.out.println("flag " + flag + " not supported!");
 			}
 		}
 
