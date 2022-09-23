@@ -302,42 +302,24 @@ public class ArgumentParser {
 		return this.map.toString();
 	}
 
-/**
- * Returns an unmodifiable view of the flags(keys) stored in the argument parser
- *
- * @return an unmodifiable view of the flags(keys) stored in the argument parser
- * @see Collections#unmodifiableCollection(Collection)
- */
-public List<String> viewFlags() {
-	return List.copyOf(map.keySet());
-}
-
-/**
- * Returns an unmodifiable view of the values stored in the argument parser
- *
- * @return an unmodified view of the values stored in the argument parser
- * @see Collections#unmodifiableCollection(Collection)
- */
-public List<String> viewValues() {
-	return List.copyOf(map.values());
-}
+	/**
+	 * Returns an unmodifiable view of the flags(keys) stored in the argument parser
+	 *
+	 * @return an unmodifiable view of the flags(keys) stored in the argument parser
+	 * @see Collections#unmodifiableCollection(Collection)
+	 */
+	public List<String> viewFlags() {
+		return List.copyOf(map.keySet());
+	}
 
 	/**
-	 * Demonstrates this class.
+	 * Returns an unmodifiable view of the values stored in the argument parser
 	 *
-	 * @param args the arguments to test
+	 * @return an unmodified view of the values stored in the argument parser
+	 * @see Collections#unmodifiableCollection(Collection)
 	 */
-	public static void main(String[] args) {
-		// Feel free to modify or delete this method for debugging
-		if (args.length < 1) {
-			args = new String[] {
-					"-max", "false", "-min", "0", "-min", "-10", "hello", "-@debug", "-f",
-					"output.txt", "-verbose" };
-		}
-
-		// expected output:
-		// {-max=false, -min=-10, -verbose=null, -f=output.txt, -@debug=null}
-		ArgumentParser map = new ArgumentParser(args);
-		System.out.println(map);
+	public List<String> viewValues() {
+		return List.copyOf(map.values());
 	}
+
 }
