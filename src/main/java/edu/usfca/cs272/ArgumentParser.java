@@ -129,6 +129,8 @@ public class ArgumentParser {
 	 * @return number of unique flags
 	 */
 	public int numFlags() {
+		// TODO optimize return `map.keySet().size()` || `map.size()` (double check docs)
+		
 		int numFlags = 0;
 
 		// All of the keys are flags, so the number of that set is the number of flags

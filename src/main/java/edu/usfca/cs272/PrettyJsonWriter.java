@@ -24,6 +24,8 @@ import java.util.TreeMap;
  * @author CS 272 Software Development (University of San Francisco)
  * @version Fall 2022
  */
+
+// TODO check the Piazza post on optimizing PrettyJsonWriter
 public class PrettyJsonWriter {
 	/**
 	 * Indents the writer by the specified number of times. Does nothing if the
