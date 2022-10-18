@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Parses and stores command-line arguments into simple flag/value pairs.(test push)
@@ -129,15 +128,7 @@ public class ArgumentParser {
 	 * @return number of unique flags
 	 */
 	public int numFlags() {
-		// TODO optimize return `map.keySet().size()` || `map.size()` (double check docs)
-		
-		int numFlags = 0;
-
-		// All of the keys are flags, so the number of that set is the number of flags
-		Set<String> flags = map.keySet();
-		numFlags += flags.size();
-
-		return numFlags;
+		return map.keySet().size();
 	}
 
 	/**

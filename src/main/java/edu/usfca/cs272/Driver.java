@@ -8,13 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Class responsible for running this project based on the provided command-line
@@ -25,74 +18,6 @@ import java.util.stream.Stream;
  * @version Fall 2022
  */
 public class Driver {
-	
-	// TODO move this into FileFinder class and refactor
-
-	/**
-	 * Gets the file extension for the file at a given path
-	 *
-	 * @param textPath the path that points to the file
-	 * @return a string containing the file extension
-	 */
-	public static String fileExtension(Path textPath) {
-		String extension = "";
-		String path = textPath.toString();
-
-		int i = path.lastIndexOf('.');
-		if (i > 0) {
-			extension = path.substring(i+1);
-		}
-		return extension;
-	}
-
-	/**
-	 * Inputs the contents of a file to the word index
-	 * @param path the path where the file is found
-	 * @param index the index to input the contents into
-	 * @throws IOException if an IO error occurs
-	 */
-	public static void inputFile(Path path, WordIndex index) throws IOException {
-		String text = Files.readString(path, UTF_8);
-		ArrayList<String> cleanedWords = WordCleaner.listStems(text);
-
-		for (int i = 0; i < cleanedWords.size(); i++) {
-			index.add(cleanedWords.get(i), path, i+1);
-		}
-	}
-
-	/**
-	 * Finds the file specified by the path, or walks through all of the files in the
-	 * directory if the path points to one
-	 *
-	 * @param textPath the path to find the files
-	 * @param indexPath the path to output the index
-	 * @param index the index to parse the files into
-	 * @param isDirectory indicates whether the textPath points to a directory or not
-	 * @throws IOException when an IO error occurs
-	 */
-	public static void findAndInput(Path textPath, Path indexPath, WordIndex index, boolean isDirectory) throws IOException {
-		if (Files.isDirectory(textPath)) {
-			try (Stream<Path> files = Files.walk(textPath)) {
-				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
-				Collections.sort(paths);
-				for (int i = 0; i < paths.size(); i++) {
-					findAndInput(paths.get(i), indexPath, index, isDirectory);
-				}
-			}
-		} else if (Files.isReadable(textPath)) {
-			String extension = fileExtension(textPath);
-			extension = extension.toLowerCase();
-			if (isDirectory && (extension.equals("txt") || extension.equals("text"))) {
-				inputFile(textPath, index);
-			}
-			if (!isDirectory) {
-				inputFile(textPath, index);
-			}
-		} else {
-			System.out.println("invalid path");
-			return;
-		}
-	}
 
 	/**
 	 * Initializes the classes necessary based on the provided command-line
@@ -105,79 +30,47 @@ public class Driver {
 		// store initial start time
 		Instant start = Instant.now();
 
-		// TODO hide this under a debugging option
-		// example: boolean DEBUG = false;
-		// or look at the Logger class https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/System.Logger.html
-		System.out.println(Arrays.toString(args));
-
 		ArgumentParser flags = new ArgumentParser();
 		flags.parse(args);
 		if (flags.viewFlags().size() == 0) {
-			// TODO add an output message for the user
-			// (for example, how to use the program)
+			System.out.println("No flags found. please use flag -text [Path] to"
+					+ "add a file to the index, and flag -index [Path] to output"
+					+ "the index to a specific location");
 			return;
 		}
 
 		WordIndex index = new WordIndex();
-		Path indexPath = Path.of("index.json");
+		Path indexPath = Path.of("index.json"); // default path
 		Path textPath = null;
-		boolean indexFound = false;
 		boolean isDirectory  = false;
-		
-		// TODO break down logical, discrete steps (akin to paragraphs)
-		// 1. check text flag via `hasFlag(...)`
-		//   a. then process
-		// 2. check index flag
-		//   a. then process
-		// 3. other flags -> print message saying "not supported")
 
-		for (String flag : flags.viewFlags()) {
-			// TODO see comment on L162
-			if (Objects.equals(flag, "-index")) {
-				indexPath = flags.getPath(flag, indexPath);
-				indexFound = true;
+		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
+			if (Files.isDirectory(textPath)) {
+				isDirectory = true;
 			}
-			if (Objects.equals(flag, "-text")) {
-				textPath = flags.getPath(flag);
-			}
-			if (!Objects.equals(flag, "-index") && !Objects.equals(flag, "-text")) {
-				System.out.println("flag " + flag + " not supported!");
-			}
-		}
 
-		// TODO print an error message, and stop processing and quit (but double check the tests!)
-		if (textPath == null) {
+			try {
+				FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
+			} catch (IOException e) {
+				System.out.println("Could not walk file path!");
+			}
+		} else if (textPath == null) {
 			try(BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8)) {
 				writer.write("[]");
 				return;
 			} catch (IOException e) {
-				System.out.println("Could not create writer");
+				System.out.println("Could not create writer!");
 			}
-
-
-		} else if (Files.isDirectory(textPath)) {
-			isDirectory = true;
 		}
 
-		// TODO next if block might not be needed, if so, remove
-		// TODO or rewrite this -- "if there is no -index, then exit"
-		// but what we want is to not do any index processing
-		// 
-		// block from L167 - L181 should be in a "paragraph"
-		if (!indexFound) {
-			return;
-		}
+		if (flags.hasFlag("-index")) {
+			indexPath = flags.getPath("-index", indexPath);
 
-		try {
-			findAndInput(textPath, indexPath, index, isDirectory);
-		} catch (IOException e) {
-			System.out.println("Could not Walk the file path!");
-		}
-
-		try {
-			PrettyJsonWriter.writeIndex(index, indexPath, 0);
-		} catch (IOException e) {
-			System.out.println("Could not write to this path.");
+			try {
+				PrettyJsonWriter.writeIndex(index, indexPath, 0);
+			} catch (IOException e) {
+				System.out.println("Could not write to this path.");
+			}
 		}
 
 		// calculate time elapsed and output

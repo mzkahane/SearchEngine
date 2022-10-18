@@ -25,7 +25,6 @@ import java.util.TreeMap;
  * @version Fall 2022
  */
 
-// TODO check the Piazza post on optimizing PrettyJsonWriter
 public class PrettyJsonWriter {
 	/**
 	 * Indents the writer by the specified number of times. Does nothing if the
@@ -89,17 +88,22 @@ public class PrettyJsonWriter {
 		writer.append("[\n");
 
 		var iterator = elements.iterator();
-		while (iterator.hasNext()) {
+
+		// Handles first element
+		if (iterator.hasNext()) {
 			writeIndent(writer, indent+1);
-
 			writer.write(iterator.next().toString());
-
-			if (iterator.hasNext()) {
-				writer.append(",\n");
-			} else {
-				writer.write("\n");
-			}
 		}
+
+		// Handles remaining elements
+		// printing comma, newline, indent, next element
+		while (iterator.hasNext()) {
+			writer.append(",\n");
+			writeIndent(writer, indent+1);
+			writer.write(iterator.next().toString());
+		}
+
+		writer.append("\n");
 		writeIndent(writer, indent);
 		writer.write("]");
 	}
