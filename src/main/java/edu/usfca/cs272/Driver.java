@@ -25,6 +25,8 @@ import java.util.stream.Stream;
  * @version Fall 2022
  */
 public class Driver {
+	
+	// TODO move this into FileFinder class and refactor
 
 	/**
 	 * Gets the file extension for the file at a given path
@@ -103,11 +105,16 @@ public class Driver {
 		// store initial start time
 		Instant start = Instant.now();
 
+		// TODO hide this under a debugging option
+		// example: boolean DEBUG = false;
+		// or look at the Logger class https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/System.Logger.html
 		System.out.println(Arrays.toString(args));
 
 		ArgumentParser flags = new ArgumentParser();
 		flags.parse(args);
 		if (flags.viewFlags().size() == 0) {
+			// TODO add an output message for the user
+			// (for example, how to use the program)
 			return;
 		}
 
@@ -116,8 +123,16 @@ public class Driver {
 		Path textPath = null;
 		boolean indexFound = false;
 		boolean isDirectory  = false;
+		
+		// TODO break down logical, discrete steps (akin to paragraphs)
+		// 1. check text flag via `hasFlag(...)`
+		//   a. then process
+		// 2. check index flag
+		//   a. then process
+		// 3. other flags -> print message saying "not supported")
 
 		for (String flag : flags.viewFlags()) {
+			// TODO see comment on L162
 			if (Objects.equals(flag, "-index")) {
 				indexPath = flags.getPath(flag, indexPath);
 				indexFound = true;
@@ -130,6 +145,7 @@ public class Driver {
 			}
 		}
 
+		// TODO print an error message, and stop processing and quit (but double check the tests!)
 		if (textPath == null) {
 			try(BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8)) {
 				writer.write("[]");
@@ -143,6 +159,11 @@ public class Driver {
 			isDirectory = true;
 		}
 
+		// TODO next if block might not be needed, if so, remove
+		// TODO or rewrite this -- "if there is no -index, then exit"
+		// but what we want is to not do any index processing
+		// 
+		// block from L167 - L181 should be in a "paragraph"
 		if (!indexFound) {
 			return;
 		}
