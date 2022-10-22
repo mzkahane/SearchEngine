@@ -23,6 +23,10 @@ public class WordIndex implements InvertedIndex<Path> {
 	 */
 	private final TreeMap<String, TreeMap<Path,ArrayList<Integer>>> index;
 
+	// TODO create a map to store the wordcounts for each path,
+	// increment as they are added to the index would probably be easiest
+	// STEMS ONLY(?)
+
 	/**
 	 * Initializes this WordIndex map
 	 */

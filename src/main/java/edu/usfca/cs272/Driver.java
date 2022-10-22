@@ -40,9 +40,13 @@ public class Driver {
 		}
 
 		WordIndex index = new WordIndex();
+		// TODO put these where they are used probably
 		Path indexPath = Path.of("index.json"); // default path
 		Path textPath = null;
 		boolean isDirectory  = false;
+		Path countsPath = Path.of("counts.json");
+		Path queryPath = null;
+		Path resultsPath = Path.of("results.json");
 
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
 			if (Files.isDirectory(textPath)) {
@@ -71,6 +75,26 @@ public class Driver {
 			} catch (IOException e) {
 				System.out.println("Could not write to this path.");
 			}
+		}
+
+		if (flags.hasFlag("-counts")) {
+			countsPath = flags.getPath("-counts", countsPath);
+			//TODO output the word count for each location into a JSON file at the countsPath
+		}
+
+		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
+			if (flags.hasFlag("-exact")) {
+				// TODO set some sort of flag to do an exact search on the query instead of partial
+			}
+			// TODO parse the file at the given path for search queries to be performed
+			// then do those searches
+		} else if (queryPath == null) {
+			// error, improper use (?)
+		}
+
+		if (flags.hasFlag("-results")) {
+			resultsPath = flags.getPath("-results", resultsPath);
+			// TODO output the results of either kind of query to the provided resultsPath
 		}
 
 		// calculate time elapsed and output

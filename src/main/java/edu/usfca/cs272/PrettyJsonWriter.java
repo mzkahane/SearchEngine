@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+// TODO add support for outputting paths and word counts
+
 /**
  * Outputs several simple data structures in "pretty" JSON format where newlines
  * are used to separate elements and nested elements are indented using spaces.

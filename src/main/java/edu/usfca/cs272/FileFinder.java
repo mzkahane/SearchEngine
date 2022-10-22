@@ -35,6 +35,9 @@ public class FileFinder {
 		return extension;
 	}
 
+	//TODO maybe do the count stuff here instead of WordIndex ( will still initialize it
+	// in WordIndex... (?) STEMS ONLY(?)
+
 	/**
 	 * Inputs the contents of a file to the word index
 	 * @param path the path where the file is found
