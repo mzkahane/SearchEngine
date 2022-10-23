@@ -3,7 +3,10 @@ package edu.usfca.cs272;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -23,15 +26,20 @@ public class WordIndex implements InvertedIndex<Path> {
 	 */
 	private final TreeMap<String, TreeMap<Path,ArrayList<Integer>>> index;
 
-	// TODO create a map to store the wordcounts for each path,
-	// increment as they are added to the index would probably be easiest
-	// STEMS ONLY(?)
+	/**
+	 * Map to store the word counts of the files in the index
+	 *
+	 * The key is the path of the file.
+	 * The value is the word count of that file
+	 */
+	private final TreeMap<String, Integer> counts;
 
 	/**
 	 * Initializes this WordIndex map
 	 */
 	public WordIndex() {
 		this.index = new TreeMap<>();
+		this.counts = new TreeMap<>(Comparator.naturalOrder());
 	}
 
 	@Override
@@ -127,13 +135,32 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public TreeMap<Path, ? extends Collection<? extends Number>> get(String key) {
-		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(key));
+	public TreeMap<Path, ? extends Collection<? extends Number>> get(String word) {
+		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(word));
 		return out;
 	}
 
 	@Override
 	public ArrayList<Integer> get(String word, Path location) {
 		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+	}
+
+	/**
+	 * Adds the location and the number of words it contains to the count Map
+	 *
+	 * @param location the location of the file being counted
+	 * @param numWords the number of words in the file
+	 */
+	public void addCount(String location, int numWords) {
+		counts.put(location, numWords);
+	}
+
+	/**
+	 * Returns an unmodifiable view of the counts map
+	 *
+	 * @return An unmodifiable view of the counts map
+	 */
+	public Map<String, Integer> getCounts() {
+		return Collections.unmodifiableSortedMap(counts);
 	}
 }

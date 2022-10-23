@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-// TODO add support for outputting paths and word counts
-
 /**
  * Outputs several simple data structures in "pretty" JSON format where newlines
  * are used to separate elements and nested elements are indented using spaces.
@@ -175,7 +173,7 @@ public class PrettyJsonWriter {
 			 writeQuote(current, writer, indent+1);
 			 writer.append(": ");
 
-			 writer.write(elements.get(current).toString()); // make this chunk a function(?)
+			 writer.write(elements.get(current).toString()); // TODO fix this like writeArray
 			 if (iterator.hasNext()) {
 				 writer.append(",\n");
 			 } else {

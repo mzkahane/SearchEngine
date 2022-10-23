@@ -73,13 +73,17 @@ public class Driver {
 			try {
 				PrettyJsonWriter.writeIndex(index, indexPath, 0);
 			} catch (IOException e) {
-				System.out.println("Could not write to this path.");
+				System.out.println("Could not write index to path: " + indexPath);
 			}
 		}
 
 		if (flags.hasFlag("-counts")) {
 			countsPath = flags.getPath("-counts", countsPath);
-			//TODO output the word count for each location into a JSON file at the countsPath
+			try {
+				PrettyJsonWriter.writeObject(index.getCounts(), countsPath);
+			} catch (IOException e) {
+				System.out.println("Could not write counts to path: " + countsPath);
+			}
 		}
 
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
