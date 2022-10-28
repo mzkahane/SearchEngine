@@ -9,7 +9,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -167,18 +169,25 @@ public class PrettyJsonWriter {
 		Set<String> keys = elements.keySet();
 		var iterator = keys.iterator();
 
+		if (iterator.hasNext()) {
+			String current = iterator.next();
+			 writeQuote(current, writer, indent+1);
+			 writer.append(": ");
+
+			 writer.write(elements.get(current).toString());
+		}
+
 		while (iterator.hasNext()) {
+			writer.append(",\n");
 			String current = iterator.next();
 
 			 writeQuote(current, writer, indent+1);
 			 writer.append(": ");
 
-			 writer.write(elements.get(current).toString()); // TODO fix this like writeArray
-			 if (iterator.hasNext()) {
-				 writer.append(",\n");
-			 } else {
-				 writer.write("\n");
-			 }
+			 writer.write(elements.get(current).toString());
+		}
+		if (elements.size() != 0) {
+			writer.write("\n");
 		}
 		writeIndent(writer, indent);
 		writer.write("}");
@@ -200,6 +209,44 @@ public class PrettyJsonWriter {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writeObject(elements, writer, 0);
 		}
+	}
+
+	/**
+	 * Writes the elements as a pretty JSON object to file.
+	 *
+	 * @param elements the elements to write
+	 * @param writer the writer to use
+	 * @param indent indent the initial indent level; the first bracket is not indented,
+	 *   inner elements are indented by one, and the last bracket is indented at
+	 *   the initial indentation level
+	 * @throws IOException if an IO error occurs
+	 */
+	public static void writeStringObject(Map<String, String> elements, Writer writer, int indent) throws IOException {
+		Set<String> keys = elements.keySet();
+		if (keys.size() == 0) {
+			return;
+		}
+		var iterator = keys.iterator();
+
+		writer.append("{\n");
+
+		if (iterator.hasNext()) {
+			String current = iterator.next();
+			writeQuote(current, writer, indent+1);
+			writer.append(": ");
+			writer.write(elements.get(current));
+		}
+
+		while (iterator.hasNext()) {
+			String current = iterator.next();
+			writer.append(",\n");
+			writeQuote(current, writer, indent+1);
+			writer.append(": ");
+			writer.write(elements.get(current));
+		}
+		writer.append("\n");
+		writeIndent(writer, indent);
+		writer.write("}");
 	}
 
 	/**
@@ -324,17 +371,51 @@ public class PrettyJsonWriter {
 		writer.write("[\n");
 		var iterator = elements.iterator();
 
-		while (iterator.hasNext()) {
+		if (iterator.hasNext()) {
 			writeIndent(writer, indent+1);
 			writeObject(iterator.next(), writer, indent+1);
-			if(iterator.hasNext()) {
-				writer.append(",\n");
-			} else {
-				writer.write("\n");
-			}
+		}
+
+		while (iterator.hasNext()) {
+			writer.append(",\n");
+			writeIndent(writer, indent+1);
+			writeObject(iterator.next(), writer, indent+1);
 		}
 		writeIndent(writer, indent);
 		writer.write("]\n");
+	}
+
+	/**
+	 * Writes the elements as a pretty JSN ArrayList with nested objects.
+	 *
+	 * @param elements the elements to write
+	 * @param writer the writer to use
+	 * @param indent the initial indent level; the first bracket is not indented,
+	 *   inner elements are indented by one, and the last bracket is indented at
+	 *   the initial indentation level
+	 * @throws IOException if an IO error occurs
+	 */
+	public static void writeNestedStringObjects(
+			ArrayList<? extends Map<String, String>> elements,
+			Writer writer, int indent) throws IOException {
+		writer.write("[\n");
+		var iterator = elements.iterator();
+
+		if (iterator.hasNext()) {
+			writeIndent(writer, indent+1);
+			writeStringObject(iterator.next(), writer, indent+1);
+		}
+
+		while (iterator.hasNext()) {
+			writer.append(",\n");
+			writeIndent(writer, indent+1);
+			writeStringObject(iterator.next(), writer, indent+1);
+		}
+		if (elements.size() != 0) {
+			writer.append("\n");
+		}
+		writeIndent(writer, indent);
+		writer.write("]");
 	}
 
 	/**
@@ -398,11 +479,51 @@ public class PrettyJsonWriter {
 				if (iterator.hasNext()) {
 					writer.append(",\n");
 				} else {
-					writer.write("\n");
+					writer.append("\n");
 				}
 			}
 			writeIndent(writer, indent);
 			writer.write("}\n");
 		}
 	}
+
+	/**
+	 * Writes the elements as a pretty JSON object with nested objects to a file
+	 *
+	 * @param searchResults the elements to write
+	 * @param path the path to write the pretty JSON object to
+	 * @param indent indent the initial indent level; the first bracket is not indented,
+	 *   inner elements are indented by one, and the last bracket is indented at
+	 *   the initial indentation level
+	 * @throws IOException when an IO error occurs
+	 */
+	public static void writeResults(TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults,
+			Path path, int indent) throws IOException {
+		try(BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
+			writer.write("{\n");
+			var keyI = searchResults.keySet().iterator();
+			if (keyI.hasNext()) {
+				String current  = keyI.next();
+				writeIndent(writer, indent);
+				writeQuote(current, writer, indent+1);
+				writer.append(": ");
+				writeNestedStringObjects(searchResults.get(current), writer, indent+1);
+			}
+
+			while (keyI.hasNext()) {
+				String current  = keyI.next();
+				writer.write(",\n");
+				writeIndent(writer, indent);
+				writeQuote(current, writer, indent+1);
+				writer.append(": ");
+				writeNestedStringObjects(searchResults.get(current), writer, indent+1);
+			}
+
+			writer.append("\n");
+			writeIndent(writer, indent);
+			writer.write("}\n");
+		}
+	}
+
+
 }
