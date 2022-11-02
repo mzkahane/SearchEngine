@@ -3,7 +3,6 @@ package edu.usfca.cs272;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,13 +57,6 @@ public class Driver {
 				FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
 			} catch (IOException e) {
 				System.out.println("Could not walk file path!");
-			}
-		} else if (textPath == null) {
-			try(BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8)) {
-				writer.write("[]");
-				return;
-			} catch (IOException e) {
-				System.out.println("Could not create writer!");
 			}
 		}
 
