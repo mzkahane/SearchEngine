@@ -2,12 +2,16 @@ package edu.usfca.cs272;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Class responsible for running this project based on the provided command-line
@@ -40,10 +44,10 @@ public class Driver {
 		}
 
 		WordIndex index = new WordIndex();
-		Path indexPath = Path.of("index.json"); // default path
+
 		Path textPath = null;
 		boolean isDirectory  = false;
-
+		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
 			if (Files.isDirectory(textPath)) {
 				isDirectory = true;
@@ -54,13 +58,6 @@ public class Driver {
 			} catch (IOException e) {
 				System.out.println("Could not walk file path!");
 			}
-		} else if (textPath == null) {
-			try(BufferedWriter writer = Files.newBufferedWriter(indexPath, UTF_8)) {
-				writer.write("[]");
-				return;
-			} catch (IOException e) {
-				System.out.println("Could not create writer!");
-			}
 		}
 
 		if (flags.hasFlag("-index")) {
@@ -69,7 +66,52 @@ public class Driver {
 			try {
 				PrettyJsonWriter.writeIndex(index, indexPath, 0);
 			} catch (IOException e) {
-				System.out.println("Could not write to this path.");
+				System.out.println("Could not write index to path: " + indexPath.toString());
+			}
+		}
+
+		Path countsPath = Path.of("counts.json"); // default path
+		if (flags.hasFlag("-counts")) {
+			countsPath = flags.getPath("-counts", countsPath);
+			try {
+				PrettyJsonWriter.writeObject(index.getWordCounts(), countsPath);
+			} catch (IOException e) {
+				System.out.println("Could not write counts to path: " + countsPath.toString());
+			}
+		}
+
+		Path queryPath = null;
+		Path resultsPath = Path.of("results.json");
+		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
+		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
+			boolean exact = false;
+			if (flags.hasFlag("-exact")) {
+				exact = true;
+			}
+
+			try {
+				BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);
+				while (reader.ready()) {
+					TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
+					if (cleanedQuery.size() > 0) {
+						var result = WordSearcher.search(cleanedQuery, index, exact);
+						String joinedQuery = String.join(" ", cleanedQuery);
+						searchResults.put(joinedQuery, result);
+					}
+				}
+			} catch (IOException e) {
+				System.out.println("Something went wrong processing -query");
+			}
+		} else if (queryPath == null) {
+			System.out.println("please specify a path to go along with the -query flag");
+		}
+
+		if (flags.hasFlag("-results")) {
+			resultsPath = flags.getPath("-results", resultsPath);
+			try {
+				PrettyJsonWriter.writeResults(searchResults, resultsPath, 0);
+			} catch (IOException e) {
+				System.out.println("Error writing results to path: " + resultsPath);
 			}
 		}
 

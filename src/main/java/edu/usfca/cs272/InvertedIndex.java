@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An index to store words and the files those words are found in as well as
@@ -137,5 +138,12 @@ public interface InvertedIndex<E> {
 	 * @return a copy of the positions for a word in a given location in the index
 	 */
 	public ArrayList<Integer> get(String word, Path location);
+
+	/**
+	 * Returns a copy of the keyset of the index
+	 *
+	 * @return a copy of the keyset of the index
+	 */
+	Set<String> getKeys();
 
 }

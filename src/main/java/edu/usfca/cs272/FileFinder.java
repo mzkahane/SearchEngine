@@ -45,6 +45,10 @@ public class FileFinder {
 		String text = Files.readString(path, UTF_8);
 		ArrayList<String> cleanedWords = WordCleaner.listStems(text);
 
+		if (cleanedWords.size() > 0) {
+			index.addWordCount(path.toString(), cleanedWords.size());
+		}
+
 		for (int i = 0; i < cleanedWords.size(); i++) {
 			index.add(cleanedWords.get(i), path, i+1);
 		}

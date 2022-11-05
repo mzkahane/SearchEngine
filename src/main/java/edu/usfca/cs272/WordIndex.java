@@ -3,7 +3,11 @@ package edu.usfca.cs272;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -21,13 +25,22 @@ public class WordIndex implements InvertedIndex<Path> {
 	 * Outer HashMap maps the word to the inner HashMap. Inner HashMap maps
 	 * each path to the positions of that word found in the file at that path.
 	 */
-	private final TreeMap<String, TreeMap<Path,ArrayList<Integer>>> index;
+	private final TreeMap<String, TreeMap<Path, ArrayList<Integer>>> index;
+
+	/**
+	 * Map to store the word counts of the files in the index
+	 *
+	 * The key is the path of the file.
+	 * The value is the word count of that file
+	 */
+	private final TreeMap<String, Integer> counts;
 
 	/**
 	 * Initializes this WordIndex map
 	 */
 	public WordIndex() {
 		this.index = new TreeMap<>();
+		this.counts = new TreeMap<>(Comparator.naturalOrder());
 	}
 
 	@Override
@@ -123,13 +136,51 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public TreeMap<Path, ? extends Collection<? extends Number>> get(String key) {
-		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(key));
+	public TreeMap<Path, ? extends Collection<? extends Number>> get(String word) {
+		if (index.get(word) == null) {
+			return null;
+		}
+		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(word));
 		return out;
 	}
 
 	@Override
 	public ArrayList<Integer> get(String word, Path location) {
 		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+	}
+
+	@Override
+	public Set<String> getKeys() {
+		return Set.copyOf(index.keySet());
+	}
+
+	/**
+	 * Adds the location and the number of words it contains to the count Map
+	 *
+	 * @param location the location of the file being counted
+	 * @param numWords the number of words in the file
+	 */
+	public void addWordCount(String location, int numWords) {
+		counts.put(location, numWords);
+	}
+
+	/**
+	 * Gets the word count of a specific file
+	 *
+	 * @param location the location of the file to get the word count of
+	 * @return the word count of the file at the location given
+	 */
+	public int getWordCount(String location) {
+		int out = counts.get(location);
+		return out;
+	}
+
+	/**
+	 * Returns an unmodifiable view of the counts map
+	 *
+	 * @return An unmodifiable view of the counts map
+	 */
+	public Map<String, Integer> getWordCounts() {
+		return Collections.unmodifiableSortedMap(counts);
 	}
 }
