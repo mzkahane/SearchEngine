@@ -92,11 +92,15 @@ public class ArgumentParser {
 			}
 			return; // if the one argument is not a flag, do nothing
 		}
+		// @TODO: instead of storing j, maybe let's just use `i+1` where we want it.
+		// - with separate i and j variables, it's easy to introduce a bug where the invariant j = i + 1 get invalidated
+		// - at the very least, you should add an assert that makes sure that remains true
 		int j = 1; // current value pointer
 		for(int i = 0; i <= args.length-1; i++) { // current key pointer
 			String key = args[i];
 			String value = args[j];
 			if(isFlag(key)) {
+				// @TODO I don't think this if statement is necessary because map.put will effectively `replace` if the key already exists
 				if(!map.containsKey(key)) {
 					if(isValue(value)) {
 						map.put(key, value); // if the key is new and the value is valid, insert
@@ -159,6 +163,7 @@ public class ArgumentParser {
 			throw new IllegalArgumentException("Argument is not a flag");
 		}
 
+		// @TODO I think this outer if statement is redundant?
 		if(map.containsKey(flag)) {
 			if(map.get(flag) != null) {
 				return true;
@@ -181,6 +186,7 @@ public class ArgumentParser {
 			throw new IllegalArgumentException("Argument is not a flag");
 		}
 
+		// @TODO I think this outer if statement is redundant?
 		if(map.containsKey(flag)) { // check to see if the flag exists in the map
 			if(map.get(flag) != null) { // check that the value is not empty/null
 				return map.get(flag);
@@ -267,6 +273,7 @@ public class ArgumentParser {
 			try { // try to convert the value from string to int, if it fails, then its not a number
 				val = Integer.parseInt(map.get(flag));
 			} catch (NumberFormatException e) {
+				// @TODO should we return backup here instead?
 				val = 0; // .. in that case, return the default 0
 			}
 

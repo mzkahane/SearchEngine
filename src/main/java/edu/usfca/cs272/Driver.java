@@ -46,9 +46,12 @@ public class Driver {
 		WordIndex index = new WordIndex();
 
 		Path textPath = null;
+		// @TODO: should be able to remove this
 		boolean isDirectory  = false;
+		// @TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
 		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
+			// @TODO: should be able to remove this
 			if (Files.isDirectory(textPath)) {
 				isDirectory = true;
 			}
@@ -70,6 +73,7 @@ public class Driver {
 			}
 		}
 
+		// @TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
 		Path countsPath = Path.of("counts.json"); // default path
 		if (flags.hasFlag("-counts")) {
 			countsPath = flags.getPath("-counts", countsPath);
@@ -81,17 +85,24 @@ public class Driver {
 		}
 
 		Path queryPath = null;
+		// @TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
 		Path resultsPath = Path.of("results.json");
 		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
+			// @TODO try a ternary operator? e.g. boolean exact = flags.hasFlag("-exact") ? true : false;
 			boolean exact = false;
 			if (flags.hasFlag("-exact")) {
 				exact = true;
 			}
 
 			try {
+				// @TODO remember to put BufferedReaders inside the try-with-resources
+				// Otherwise you have to remember to close it
 				BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);
+				// @TODO try `while((line = reader.readLine()) != null) {`
 				while (reader.ready()) {
+					// @TODO: let's move any search functionality (e.g. parsing/cleaning/looping over lines etc) into a method in WordSearcher
+					// so that the Driver can just focus on the minimal argument parsing + calling methods
 					TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
 					if (cleanedQuery.size() > 0) {
 						var result = WordSearcher.search(cleanedQuery, index, exact);

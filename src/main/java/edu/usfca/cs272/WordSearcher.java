@@ -23,6 +23,9 @@ public class WordSearcher {
 	 * one of the query words.
 	 */
 	private static LinkedHashMap<Path, Integer> findResults(TreeSet<String> query, WordIndex index, boolean exact) {
+		// @TODO add more in-line comments on what's going on
+		// @TODO merge the top and bottom clauses of the outer if statement because they're pretty similar
+		// checking for if(exact) should happen inside
 		LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
 		if (exact) {
 			for (String word : query) {
@@ -89,6 +92,9 @@ public class WordSearcher {
 			temp.put("score", String.format("%.8f", (double) appearances/index.getWordCount(location.toString())));
 			temp.put("where", ('"' + location.toString() + '"'));
 
+			// @TODO we had floats before, so calculating j here is more complicated, because you have to parse it back from a String
+			// @TODO create a SearchResult class that implements Comparable, then I can call Collections.sort(scoredResults)
+			// - hint: take advantage of Integer.compare or Double.compare
 			int j = scoredResults.size();
 			for (int i = 0; i < scoredResults.size(); i++) {
 				if (Float.parseFloat(scoredResults.get(i).get("score")) < Float.parseFloat(temp.get("score"))) {
