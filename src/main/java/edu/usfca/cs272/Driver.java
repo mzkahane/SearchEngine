@@ -43,20 +43,39 @@ public class Driver {
 			return;
 		}
 
-		WordIndex index = new WordIndex();
+		InvertedIndex index;
+
+		int threadCount;
+		boolean multithreaded = false;
+		if (flags.hasFlag("-threads")) {
+			multithreaded = true;
+			threadCount = flags.getInteger("-threads", 5);
+
+			if (threadCount < 1) {
+				System.out.println("Thread count must be 1 or greater");
+				// TODO log
+				return;
+			}
+
+			index = new ThreadSafeIndex(threadCount);
+		}
 
 		Path textPath = null;
 		boolean isDirectory  = false;
 		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
-			if (Files.isDirectory(textPath)) {
-				isDirectory = true;
-			}
+			if (multithreaded) {
+				ThreadSafeFileFinder.findAndInput(textPath, index, isDirectory, threadCount);
+			} else {
+				if (Files.isDirectory(textPath)) {
+					isDirectory = true;
+				}
 
-			try {
-				FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
-			} catch (IOException e) {
-				System.out.println("Could not walk file path!");
+				try {
+					FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
+				} catch (IOException e) {
+					System.out.println("Could not walk file path!");
+				}
 			}
 		}
 
@@ -89,18 +108,21 @@ public class Driver {
 				exact = true;
 			}
 
-			try {
-				BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);
-				while (reader.ready()) {
-					TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
-					if (cleanedQuery.size() > 0) {
-						var result = WordSearcher.search(cleanedQuery, index, exact);
-						String joinedQuery = String.join(" ", cleanedQuery);
-						searchResults.put(joinedQuery, result);
+			if(multithreaded) {
+				ThreadSafeWordSearcher.search(queryPath, index, searchResults, exact, threadCount);
+			} else {
+				try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {
+					while (reader.ready()) {
+						TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
+						if (cleanedQuery.size() > 0) {
+							var result = WordSearcher.search(cleanedQuery, index, exact);
+							String joinedQuery = String.join(" ", cleanedQuery);
+							searchResults.put(joinedQuery, result);
+						}
 					}
+				} catch (IOException e) {
+					System.out.println("Something went wrong processing -query");
 				}
-			} catch (IOException e) {
-				System.out.println("Something went wrong processing -query");
 			}
 		} else if (queryPath == null) {
 			System.out.println("please specify a path to go along with the -query flag");

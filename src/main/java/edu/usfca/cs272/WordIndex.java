@@ -132,7 +132,7 @@ public class WordIndex implements InvertedIndex<Path> {
 			ArrayList<Integer> empty = new ArrayList<Integer>();
 			return empty;
 		}
-		return null;
+		return List.copyOf(index.get(word).get(location));
 	}
 
 	@Override
