@@ -13,6 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.
@@ -22,6 +25,9 @@ import java.util.TreeSet;
  * @version Fall 2022
  */
 public class Driver {
+
+	/** Logger used throughout the Driver */
+	private static final Logger log = LogManager.getLogger("Driver");
 
 	/**
 	 * Initializes the classes necessary based on the provided command-line
@@ -43,7 +49,7 @@ public class Driver {
 			return;
 		}
 
-		InvertedIndex index;
+		InvertedIndex<Path> index;
 
 		int threadCount;
 		boolean multithreaded = false;
@@ -53,10 +59,11 @@ public class Driver {
 
 			if (threadCount < 1) {
 				System.out.println("Thread count must be 1 or greater");
-				// TODO log
+				log.error("Thread count is less than 1");
 				return;
 			}
 
+			log.debug("Threads flag found, Creating ThreadSafeIndex...");
 			index = new ThreadSafeIndex(threadCount);
 		}
 
@@ -64,38 +71,49 @@ public class Driver {
 		boolean isDirectory  = false;
 		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
+			log.debug("Text flag found");
 			if (multithreaded) {
+				log.debug("Passing textPath to ThreadSafeFileFinder...");
 				ThreadSafeFileFinder.findAndInput(textPath, index, isDirectory, threadCount);
 			} else {
 				if (Files.isDirectory(textPath)) {
+					log.debug("textPath points to a directory");
 					isDirectory = true;
 				}
 
 				try {
+					log.debug("Passing textPath to single threaded FileFinder...");
 					FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
 				} catch (IOException e) {
 					System.out.println("Could not walk file path!");
+					log.catching(e);
 				}
 			}
 		}
 
 		if (flags.hasFlag("-index")) {
 			indexPath = flags.getPath("-index", indexPath);
+			log.debug("Index flag found");
 
 			try {
+				log.debug("Passing index to PrettyJsonWriter...");
 				PrettyJsonWriter.writeIndex(index, indexPath, 0);
 			} catch (IOException e) {
 				System.out.println("Could not write index to path: " + indexPath.toString());
+				log.catching(e);
 			}
 		}
 
 		Path countsPath = Path.of("counts.json"); // default path
 		if (flags.hasFlag("-counts")) {
 			countsPath = flags.getPath("-counts", countsPath);
+			log.debug("Counts flag found");
 			try {
+				log.debug("Passing countsPath to PrettyJson Writer");
 				PrettyJsonWriter.writeObject(index.getWordCounts(), countsPath);
 			} catch (IOException e) {
 				System.out.println("Could not write counts to path: " + countsPath.toString());
+				log.catching(e);
 			}
 		}
 
@@ -103,14 +121,18 @@ public class Driver {
 		Path resultsPath = Path.of("results.json");
 		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
+			log.debug("Query flag found");
 			boolean exact = false;
 			if (flags.hasFlag("-exact")) {
 				exact = true;
+				log.debug("Exact flag found");
 			}
 
 			if(multithreaded) {
+				log.debug("Passing queryPath to ThreadSafeWordSearcher...");
 				ThreadSafeWordSearcher.search(queryPath, index, searchResults, exact, threadCount);
 			} else {
+				log.debug("Cleaning query, Searching index, and putting searchResults...");
 				try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {
 					while (reader.ready()) {
 						TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
@@ -122,18 +144,23 @@ public class Driver {
 					}
 				} catch (IOException e) {
 					System.out.println("Something went wrong processing -query");
+					log.catching(e);
 				}
 			}
 		} else if (queryPath == null) {
 			System.out.println("please specify a path to go along with the -query flag");
+			log.error("No path was found after -query flag");
 		}
 
 		if (flags.hasFlag("-results")) {
 			resultsPath = flags.getPath("-results", resultsPath);
+			log.debug("Results flag found");
 			try {
+				log.debug("Passing results to PrettyJsonWriter...");
 				PrettyJsonWriter.writeResults(searchResults, resultsPath, 0);
 			} catch (IOException e) {
 				System.out.println("Error writing results to path: " + resultsPath);
+				log.catching(e);
 			}
 		}
 

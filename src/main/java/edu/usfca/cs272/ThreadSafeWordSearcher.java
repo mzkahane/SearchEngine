@@ -12,6 +12,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Processes search queries and calculates the search results and their scores
  * in a thread safe way.
@@ -21,6 +24,9 @@ import java.util.TreeSet;
  * @author Matthew Kahane
  */
 public class ThreadSafeWordSearcher extends WordSearcher {
+
+	/** Logger used throughout this class */
+	public static final Logger log = LogManager.getLogger("ThreadSafeWordSearcher");
 
 	/**
 	 * Takes a path input to parse one or more search queries from. For each query,
@@ -38,19 +44,25 @@ public class ThreadSafeWordSearcher extends WordSearcher {
 			TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults,
 			boolean exact, int threadCount) {
 		WorkQueue queue = new WorkQueue(threadCount);
+		log.debug("WorkQueue created with %d threads", threadCount);
 
 		try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {
+			log.debug("Reader created, creating tasks...");
 			while (reader.ready()) {
 				TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
 				if (cleanedQuery.size() > 0) {
 					queue.execute(new Task(cleanedQuery, index, exact, searchResults));
 				}
 			}
+			log.debug("Finished creating tasks");
 		} catch (IOException e) {
 			System.out.println("Could not read file at  query path: " + queryPath);
-			// TODO log.catching
+			log.catching(e);
 			return;
 		}
+		log.debug("Waiting for tasks to finish...");
+		queue.join();
+		log.debug("Tasks finished, queue terminated");
 	}
 
 	/**
@@ -126,6 +138,7 @@ public class ThreadSafeWordSearcher extends WordSearcher {
 					}
 				}
 			}
+			log.debug("Finished searching queries");
 			ArrayList<LinkedHashMap<String, String>> scoredResults = new ArrayList<>();
 
 			Path location;
@@ -159,9 +172,11 @@ public class ThreadSafeWordSearcher extends WordSearcher {
 					}
 				}
 				scoredResults.add(j, temp);
+				log.debug("All results scored");
 			}
 			String joinedQuery = String.join(" ", query);
 			synchronized (searchResults) {
+				log.debug("Putting query and scoredResults into searchResults...");
 				searchResults.put(joinedQuery, scoredResults);
 			}
 		}

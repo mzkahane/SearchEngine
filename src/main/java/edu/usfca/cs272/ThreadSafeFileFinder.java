@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Finds files given a Path and inputs them into an index in a thread safe way.
  *
@@ -29,6 +32,8 @@ public class ThreadSafeFileFinder extends FileFinder {
 	 * separate loggers per class in the xml, level set to off
 	 */
 
+	/** Logger used throughout this class */
+	private static final Logger log = LogManager.getLogger("ThreadSafeFileFinder");
 
 	/**
 	 * Finds the file specified by the path, or walks through all the files in the
@@ -44,21 +49,26 @@ public class ThreadSafeFileFinder extends FileFinder {
 		WorkQueue queue = new WorkQueue(threadCount);
 
 		if (isDirectory) {
+			log.debug("textPath points to a directory");
 			try (Stream<Path> files = Files.walk(textPath)) {
 				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
 				Collections.sort(paths);
+				log.debug("Finished walking the file path");
 				for (int i = 0; i < paths.size(); i++) {
 					queue.execute(new Task(paths.get(i), index));
 				}
+				log.debug("Finished creating tasks");
 			} catch (IOException e) {
 				System.out.println("Could not walk text path : " + textPath);
-				// TODO log.catching
+				log.catching(e);
 			}
 		} else if (Files.isReadable(textPath)) {
+			log.debug("textPath points to a file");
 			queue.execute(new Task(textPath, index));
 		}
-
+		log.debug("Waiting for tasks to finish...");
 		queue.join();
+		log.debug("Tasks finished, queue terminated");
 	}
 
 	/**
@@ -88,10 +98,11 @@ public class ThreadSafeFileFinder extends FileFinder {
 		@Override
 		public void run() {
 			try {
+				log.debug("calling FileFinder.inputFile...");
 				FileFinder.inputFile(textPath, index);
 			} catch (IOException e) {
 				System.out.println("Could not read text file at : " + textPath);
-				// TODO log.catching
+				log.catching(e);
 			}
 		}
 

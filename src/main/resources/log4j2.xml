@@ -1,23 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE log4j:configuration>
 <Configuration status="WARN">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%m %throwable{short.message}%n">
+			<PatternLayout pattern="%level{length=5}: %m%throwable{short.message}%n">
 			</PatternLayout>
 		</Console>
 
-		<File name="Debug" fileName="debug.log" append="false" immediateFlush="true">
-			<PatternLayout
-				pattern="[%03sequenceNumber %level{lowerCase=true}] %file:%line %thread: %m %throwable%n">
+		<File name="FileLog" fileName="debug.log" append="false">
+			<PatternLayout pattern="[%02.-03c%sequenceNumber %level] %file:%line %thread - %m%throwable{3}%n">
 			</PatternLayout>
 		</File>
 	</Appenders>
 
 	<Loggers>
+		<Logger name="Driver" level="DEBUG" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+		</Logger>
+		
+		<Logger name="ArgumentParser" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="FileFinder" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="PrettyJsonWriter" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="ThreadSafeFileFinder" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="ThreadSafeWordSearcher" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="WordCleaner" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+		
+		<Logger name="WordSearcher" level="DEBUG" additivity="false">
+			<AppenderRef ref="FileLog" />
+		</Logger>
+				
+
 		<Root level="ALL">
 			<AppenderRef ref="Console" level="INFO" />
-			<AppenderRef ref="Debug" level="ALL" />
+			<AppenderRef ref="FileLog" level="ALL"  />
 		</Root>
 	</Loggers>
 </Configuration>
