@@ -20,20 +20,23 @@ import org.apache.logging.log4j.Logger;
  */
 public class ThreadSafeFileFinder extends FileFinder {
 
-	/*  XXX QUESTIONS
-	 * - CR todos affect the implementation of things in PR3, which first?
-	 *
-	 * - less copy-paste, more only task and queue, calling super for the rest?
-	 *
-	 * - ThreadSafeIndex lock fields not used?
-	 *
-	 * - Logger set up? turn off for individual classes?
-	 *
-	 * separate loggers per class in the xml, level set to off
-	 */
-
 	/** Logger used throughout this class */
 	private static final Logger log = LogManager.getLogger("ThreadSafeFileFinder");
+
+	private static boolean isTextFile(Path textPath) {
+		String extension = "";
+		String path = textPath.toString();
+
+		int i = path.lastIndexOf(".");
+		if (i > 0) {
+			extension = path.substring(i+1);
+		}
+
+		if (extension.equalsIgnoreCase("txt") || extension.equalsIgnoreCase("text")) {
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Finds the file specified by the path, or walks through all the files in the
@@ -48,14 +51,16 @@ public class ThreadSafeFileFinder extends FileFinder {
 	public static void findAndInput(Path textPath, ThreadSafeIndex index, boolean isDirectory, int threadCount) {
 		WorkQueue queue = new WorkQueue(threadCount);
 
-		if (isDirectory) {
+		if (Files.isDirectory(textPath)) {
 			log.debug("textPath points to a directory");
 			try (Stream<Path> files = Files.walk(textPath)) {
 				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
 				Collections.sort(paths);
 				log.debug("Finished walking the file path");
 				for (int i = 0; i < paths.size(); i++) {
-					queue.execute(new Task(paths.get(i), index));
+					if (isTextFile(paths.get(i))) {
+						queue.execute(new Task(paths.get(i), index));
+					}
 				}
 				log.debug("Finished creating tasks");
 			} catch (IOException e) {

@@ -274,7 +274,7 @@ public class PrettyJsonWriter {
 	 * notation used allows this method to be used for any type of map with any
 	 * type of nested collection of number objects.
 	 *
-	 * @param elements the elements to write
+	 * @param map the elements to write
 	 * @param writer the writer to use
 	 * @param indent the initial indent level; the first bracket is not indented,
 	 *   inner elements are indented by one, and the last bracket is indented at
@@ -287,17 +287,17 @@ public class PrettyJsonWriter {
 	 * @see #writeArray(Collection)
 	 */
 	public static void writeNestedArrays(
-			TreeMap<Path, ? extends Collection<? extends Number>> elements,
+			Map<Path, ? extends Collection<? extends Number>> map,
 			Writer writer, int indent) throws IOException {
 		writer.write("{\n");
-		Set<Path> keys = elements.keySet();
+		Set<Path> keys = map.keySet();
 		var iterator = keys.iterator();
 
 		while (iterator.hasNext()) {
 			Path current = iterator.next();
 			writeQuote(current.toString(), writer, indent+1);
 			writer.append(": ");
-			writeArray(elements.get(current), writer, indent+1);
+			writeArray(map.get(current), writer, indent+1);
 			if (iterator.hasNext()) {
 				writer.append(",\n");
 			} else {
@@ -317,7 +317,7 @@ public class PrettyJsonWriter {
 	 *
 	 * @see Files#newBufferedReader(Path, java.nio.charset.Charset)
 	 * @see StandardCharsets#UTF_8
-	 * @see #writeNestedArrays(TreeMap, Writer, int)
+	 * @see #writeNestedArrays(Map, Writer, int)
 	 */
 	public static void writeNestedArrays(
 			TreeMap<Path, ? extends Collection<? extends Number>> elements, Path path)
@@ -334,7 +334,7 @@ public class PrettyJsonWriter {
 	 * @return a {@link String} containing the elements in pretty JSON format
 	 *
 	 * @see StringWriter
-	 * @see #writeNestedArrays(TreeMap, Writer, int)
+	 * @see #writeNestedArrays(Map, Writer, int)
 	 */
 	public static String writeNestedArrays(
 			TreeMap<Path, ? extends Collection<? extends Number>> elements) {
@@ -461,21 +461,21 @@ public class PrettyJsonWriter {
 	/**
 	 * Writes the elements as a pretty JSON object with nested objects to a file
 	 *
-	 * @param elements the elements to write
+	 * @param index the elements to write
 	 * @param path the path to write them to
 	 * @param indent the level of indent
 	 * @throws IOException when an IO error occurs
 	 */
-	public static void writeIndex(WordIndex elements, Path path, int indent) throws IOException {
+	public static void writeIndex(InvertedIndex<Path> index, Path path, int indent) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");
-			var iterator = elements.view().iterator();
+			var iterator = index.view().iterator();
 			while (iterator.hasNext()) {
 				String current = iterator.next();
 				writeIndent(writer, indent);
 				writeQuote(current, writer, indent+1);
 				writer.append(": ");
-				writeNestedArrays(elements.get(current), writer, indent+1);
+				writeNestedArrays(index.get(current), writer, indent+1);
 				if (iterator.hasNext()) {
 					writer.append(",\n");
 				} else {

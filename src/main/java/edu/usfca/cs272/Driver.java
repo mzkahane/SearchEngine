@@ -51,7 +51,7 @@ public class Driver {
 
 		InvertedIndex<Path> index;
 
-		int threadCount;
+		int threadCount = 5;
 		boolean multithreaded = false;
 		if (flags.hasFlag("-threads")) {
 			multithreaded = true;
@@ -65,6 +65,8 @@ public class Driver {
 
 			log.debug("Threads flag found, Creating ThreadSafeIndex...");
 			index = new ThreadSafeIndex(threadCount);
+		} else {
+			index = new WordIndex();
 		}
 
 		Path textPath = null;
@@ -74,7 +76,7 @@ public class Driver {
 			log.debug("Text flag found");
 			if (multithreaded) {
 				log.debug("Passing textPath to ThreadSafeFileFinder...");
-				ThreadSafeFileFinder.findAndInput(textPath, index, isDirectory, threadCount);
+				ThreadSafeFileFinder.findAndInput(textPath, (ThreadSafeIndex)index, isDirectory, threadCount);
 			} else {
 				if (Files.isDirectory(textPath)) {
 					log.debug("textPath points to a directory");
@@ -83,7 +85,7 @@ public class Driver {
 
 				try {
 					log.debug("Passing textPath to single threaded FileFinder...");
-					FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
+					FileFinder.findAndInput(textPath, indexPath, (WordIndex) index, isDirectory);
 				} catch (IOException e) {
 					System.out.println("Could not walk file path!");
 					log.catching(e);
@@ -110,7 +112,7 @@ public class Driver {
 			log.debug("Counts flag found");
 			try {
 				log.debug("Passing countsPath to PrettyJson Writer");
-				PrettyJsonWriter.writeObject(index.getWordCounts(), countsPath);
+				PrettyJsonWriter.writeObject(((WordIndex) index).getWordCounts(), countsPath);
 			} catch (IOException e) {
 				System.out.println("Could not write counts to path: " + countsPath.toString());
 				log.catching(e);
@@ -130,14 +132,14 @@ public class Driver {
 
 			if(multithreaded) {
 				log.debug("Passing queryPath to ThreadSafeWordSearcher...");
-				ThreadSafeWordSearcher.search(queryPath, index, searchResults, exact, threadCount);
+				ThreadSafeWordSearcher.search(queryPath, (ThreadSafeIndex) index, searchResults, exact, threadCount);
 			} else {
 				log.debug("Cleaning query, Searching index, and putting searchResults...");
 				try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {
 					while (reader.ready()) {
 						TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
 						if (cleanedQuery.size() > 0) {
-							var result = WordSearcher.search(cleanedQuery, index, exact);
+							var result = WordSearcher.search(cleanedQuery, (WordIndex) index, exact);
 							String joinedQuery = String.join(" ", cleanedQuery);
 							searchResults.put(joinedQuery, result);
 						}
@@ -147,7 +149,7 @@ public class Driver {
 					log.catching(e);
 				}
 			}
-		} else if (queryPath == null) {
+		} else if (flags.hasFlag("-query")&& queryPath == null) {
 			System.out.println("please specify a path to go along with the -query flag");
 			log.error("No path was found after -query flag");
 		}
