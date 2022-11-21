@@ -15,7 +15,7 @@
 
 	<Loggers>
 		<Logger name="Driver" level="DEBUG" additivity="false">
-			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="FileLog" level="ALL" />
 		</Logger>
 		
 		<Logger name="ArgumentParser" level="DEBUG" additivity="false">
