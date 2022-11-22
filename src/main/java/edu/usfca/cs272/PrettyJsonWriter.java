@@ -466,7 +466,7 @@ public class PrettyJsonWriter {
 	 * @param indent the level of indent
 	 * @throws IOException when an IO error occurs
 	 */
-	// @TODO can we make this more general purpose? by calling elements.view() outside of the method and pass it in as a parameter
+	// TODO can we make this more general purpose? by calling elements.view() outside of the method and pass it in as a parameter
 	public static void writeIndex(WordIndex elements, Path path, int indent) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");
@@ -498,8 +498,8 @@ public class PrettyJsonWriter {
 	 *   the initial indentation level
 	 * @throws IOException when an IO error occurs
 	 */
-	// @TODO can we just use Map, List in the arguments?
-	// @TODO can we rename this to something more general purpose?
+	// TODO can we just use Map, List in the arguments?
+	// TODO can we rename this to something more general purpose?
 	public static void writeResults(TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults,
 			Path path, int indent) throws IOException {
 		try(BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {

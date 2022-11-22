@@ -29,7 +29,7 @@ public class FileFinder {
 		String path = textPath.toString();
 
 		int i = path.lastIndexOf('.');
-		// @TODO here's another example of a ternary:
+		// TODO here's another example of a ternary:
 		// return i > 0 ? path.substring(i+1) : "";
 		if (i > 0) {
 			extension = path.substring(i+1);
@@ -43,7 +43,7 @@ public class FileFinder {
 	 * @param index the index to input the contents into
 	 * @throws IOException if an IO error occurs
 	 */
-	// @TODO instead of static method in FileFinder, this might be more appropriate
+	// TODO instead of static method in FileFinder, this might be more appropriate
 	// as a non-static method in WordIndex.inputFile(Path path)
 	public static void inputFile(Path path, WordIndex index) throws IOException {
 		String text = Files.readString(path, UTF_8);
@@ -69,7 +69,7 @@ public class FileFinder {
 	 * @throws IOException when an IO error occurs
 	 */
 	public static void findAndInput(Path textPath, Path indexPath, WordIndex index, boolean isDirectory) throws IOException {
-		// @TODO: instead of isDirectory, it's really about whether to ignore file extension
+		// TODO: instead of isDirectory, it's really about whether to ignore file extension
 		if (Files.isDirectory(textPath)) {
 			try (Stream<Path> files = Files.walk(textPath)) {
 				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
@@ -79,15 +79,15 @@ public class FileFinder {
 				}
 			}
 		} else if (Files.isReadable(textPath)) {
-			// @TODO abstract this out into isTextFile method
+			// TODO abstract this out into isTextFile method
 			String extension = fileExtension(textPath);
 			extension = extension.toLowerCase();
 			if (isDirectory && (extension.equals("txt") || extension.equals("text"))) {
-				// @TODO call index.inputFile(textPath)
+				// TODO call index.inputFile(textPath)
 				inputFile(textPath, index);
 			}
 			if (!isDirectory) {
-				// @TODO call index.inputFile(textPath)
+				// TODO call index.inputFile(textPath)
 				inputFile(textPath, index);
 			}
 		} else {

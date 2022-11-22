@@ -45,7 +45,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public void add(String word, Path location, ArrayList<Integer> positions) {
-		// @TODO take a look at putIfAbsent
+		// TODO take a look at putIfAbsent
 		// https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/util/Map.html#putIfAbsent(K,V)
 		//
 		// index.putIfAbsent(word, new TreeMap());
@@ -65,7 +65,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public void add(String word, Path location, Integer position) {
-		// @TODO take a look at putIfAbsent
+		// TODO take a look at putIfAbsent
 		if (!index.containsKey(word)) {
 			var temp = new TreeMap<Path, ArrayList<Integer>>();
 			temp.put(location, new ArrayList<Integer>());
@@ -90,13 +90,13 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public int size(String word) {
-		// @TODO possible NullPointerException, fix using has()
+		// TODO possible NullPointerException, fix using has()
 		return index.get(word).size();
 	}
 
 	@Override
 	public int size(String word, Path location) {
-		// @TODO possible NullPointerException, fix using has()
+		// TODO possible NullPointerException, fix using has()
 		return index.get(word).get(location).size();
 	}
 
@@ -107,7 +107,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public boolean has(String word, Path location) {
-		// @TODO try ternary
+		// TODO try ternary
 		if (has(word)) {
 			return index.get(word).containsKey(location);
 		}
@@ -116,7 +116,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public boolean has(String word, Path location, Integer position) {
-		// @TODO try ternary
+		// TODO try ternary
 		if (has(word, location)) {
 			return index.get(word).get(location).contains(position);
 		}
@@ -139,7 +139,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public Collection<Integer> view(String word, Path location) {
-		// @TODO does this always return either empty list or null
+		// TODO does this always return either empty list or null
 		if (!has(word, location)) {
 			ArrayList<Integer> empty = new ArrayList<Integer>();
 			return empty;
@@ -152,7 +152,7 @@ public class WordIndex implements InvertedIndex<Path> {
 		if (index.get(word) == null) {
 			return null;
 		}
-		// @TODO (optional) - technically this is a shallow copy
+		// TODO (optional) - technically this is a shallow copy
 		// to properly deep copy, you have to iterate over all your values and clone those lists as well
 		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(word));
 		return out;
@@ -160,7 +160,7 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public ArrayList<Integer> get(String word, Path location) {
-		// @TODO NullPointerException possibility - we should specify in the Javadoc comments what's the intended behavior if index.get(word) returns null. Should it throw or just return null?
+		// TODO NullPointerException possibility - we should specify in the Javadoc comments what's the intended behavior if index.get(word) returns null. Should it throw or just return null?
 		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
 	}
 
