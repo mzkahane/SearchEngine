@@ -28,6 +28,7 @@ public class Driver {
 
 	/** Logger used throughout the Driver */
 	private static final Logger log = LogManager.getLogger("Driver");
+	// TODO change root logger level in Tests log4j2. copy and paste loggers from my logger to tests logger
 
 	/**
 	 * Initializes the classes necessary based on the provided command-line

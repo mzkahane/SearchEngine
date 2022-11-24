@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * Parses and stores command-line arguments into simple flag/value pairs.(test push)
  *
@@ -16,8 +13,6 @@ import org.apache.logging.log4j.Logger;
  * @version Fall 2022
  */
 public class ArgumentParser {
-
-	private static final Logger log = LogManager.getLogger("ArgumentParser");
 
 	/**
 	 * Stores command-line arguments in flag/value pairs.

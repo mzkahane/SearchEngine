@@ -18,18 +18,6 @@
 			<AppenderRef ref="FileLog" level="ALL" />
 		</Logger>
 		
-		<Logger name="ArgumentParser" level="DEBUG" additivity="false">
-			<AppenderRef ref="FileLog" />
-		</Logger>
-		
-		<Logger name="FileFinder" level="DEBUG" additivity="false">
-			<AppenderRef ref="FileLog" />
-		</Logger>
-		
-		<Logger name="PrettyJsonWriter" level="DEBUG" additivity="false">
-			<AppenderRef ref="FileLog" />
-		</Logger>
-		
 		<Logger name="ThreadSafeFileFinder" level="DEBUG" additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
@@ -37,15 +25,6 @@
 		<Logger name="ThreadSafeWordSearcher" level="DEBUG" additivity="false">
 			<AppenderRef ref="FileLog" />
 		</Logger>
-		
-		<Logger name="WordCleaner" level="DEBUG" additivity="false">
-			<AppenderRef ref="FileLog" />
-		</Logger>
-		
-		<Logger name="WordSearcher" level="DEBUG" additivity="false">
-			<AppenderRef ref="FileLog" />
-		</Logger>
-				
 
 		<Root level="ALL">
 			<AppenderRef ref="Console" level="INFO" />

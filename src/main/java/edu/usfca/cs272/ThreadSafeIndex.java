@@ -3,7 +3,6 @@ package edu.usfca.cs272;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -23,28 +22,10 @@ public class ThreadSafeIndex extends WordIndex{
 	private final ReadWriteLock countsLock;
 
 	/**
-	 * Index to store the given data in.
-	 *
-	 * Outer HashMap maps the word to the inner HashMap. Inner HashMap maps
-	 * each path to the positions of that word found in the file at that path.
-	 */
-	private final TreeMap<String, TreeMap<Path, ArrayList<Integer>>> index;
-
-	/**
-	 * Map to store the word counts of the files in the index
-	 *
-	 * The key is the path of the file.
-	 * The value is the word count of that file
-	 */
-	private final TreeMap<String, Integer> counts;
-
-	/**
 	 * Initializes this ThreadSafeIndex map
 	 * @param threadCount the number of threads to start the WorkQueue with
 	 */
 	public ThreadSafeIndex(int threadCount) {
-		this.index = new TreeMap<>();
-		this.counts = new TreeMap<>(Comparator.naturalOrder());
 		this.lock = new ReadWriteLock();
 		this.countsLock = new ReadWriteLock();
 	}

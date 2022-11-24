@@ -23,6 +23,12 @@ public class ThreadSafeFileFinder extends FileFinder {
 	/** Logger used throughout this class */
 	private static final Logger log = LogManager.getLogger("ThreadSafeFileFinder");
 
+	/**
+	 * Returns true if the path points to a .txt or .text file, otherwise returns false
+	 *
+	 * @param textPath the text path where the file is found
+	 * @return true if the path points to a text file, false otherwise
+	 */
 	private static boolean isTextFile(Path textPath) {
 		String extension = "";
 		String path = textPath.toString();
