@@ -45,42 +45,16 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public void add(String word, Path location, ArrayList<Integer> positions) {
-		// TODO take a look at putIfAbsent
-		// https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/util/Map.html#putIfAbsent(K,V)
-		//
-		// index.putIfAbsent(word, new TreeMap());
-		// index.get(word).putIfAbsent(location, new ArrayList());
-		// index.get(word).get(location).addAll(positions);
-		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
-			temp.put(location, positions);
-			index.put(word, temp);
-		} else if (!index.get(word).containsKey(location)) {
-			index.get(word).put(location, positions);
-		} else {
-			index.get(word).get(location).addAll(positions);
-		}
-
+		 index.putIfAbsent(word, new TreeMap<Path, ArrayList<Integer>>());
+		 index.get(word).putIfAbsent(location, positions);
+		 index.get(word).get(location).addAll(positions);
 	}
 
 	@Override
 	public void add(String word, Path location, Integer position) {
-		// TODO take a look at putIfAbsent
-		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
-			temp.put(location, new ArrayList<Integer>());
-
-			ArrayList<Integer> array = temp.get(location);
-			array.add(position);
-
-			index.putIfAbsent(word, temp);
-		} else if (!index.get(word).containsKey(location)) {
-			ArrayList<Integer> array = new ArrayList<Integer>();
-			array.add(position);
-			index.get(word).putIfAbsent(location, array);
-		} else {
-			index.get(word).get(location).add(position);
-		}
+		index.putIfAbsent(word, new TreeMap<Path, ArrayList<Integer>>());
+		index.get(word).putIfAbsent(location, new ArrayList<Integer>());
+		index.get(word).get(location).add(position);
 	}
 
 	@Override
@@ -90,14 +64,20 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public int size(String word) {
-		// TODO possible NullPointerException, fix using has()
-		return index.get(word).size();
+		if (has(word)) {
+			return index.get(word).size();
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
 	public int size(String word, Path location) {
-		// TODO possible NullPointerException, fix using has()
-		return index.get(word).get(location).size();
+		if (has(word, location)) {
+			return index.get(word).get(location).size();
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
@@ -107,20 +87,12 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public boolean has(String word, Path location) {
-		// TODO try ternary
-		if (has(word)) {
-			return index.get(word).containsKey(location);
-		}
-		return false;
+		return has(word) ? index.get(word).containsKey(location) : false;
 	}
 
 	@Override
 	public boolean has(String word, Path location, Integer position) {
-		// TODO try ternary
-		if (has(word, location)) {
-			return index.get(word).get(location).contains(position);
-		}
-		return false;
+		return has(word, location) ? index.get(word).get(location).contains(position) : false;
 	}
 
 	@Override
@@ -139,12 +111,11 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public Collection<Integer> view(String word, Path location) {
-		// TODO does this always return either empty list or null
 		if (!has(word, location)) {
 			ArrayList<Integer> empty = new ArrayList<Integer>();
 			return empty;
 		}
-		return null;
+		return Collections.unmodifiableCollection(index.get(word).get(location));
 	}
 
 	@Override
@@ -160,8 +131,11 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public ArrayList<Integer> get(String word, Path location) {
-		// TODO NullPointerException possibility - we should specify in the Javadoc comments what's the intended behavior if index.get(word) returns null. Should it throw or just return null?
-		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+		if (has(word, location)) {
+			return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+		} else {
+			return null;
+		}
 	}
 
 	@Override

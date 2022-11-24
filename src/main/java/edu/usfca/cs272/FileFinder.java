@@ -24,17 +24,15 @@ public class FileFinder {
 	 * @param textPath the path that points to the file
 	 * @return a string containing the file extension
 	 */
-	public static String fileExtension(Path textPath) {
-		String extension = "";
+	public static boolean isTextFile(Path textPath) {
 		String path = textPath.toString();
 
 		int i = path.lastIndexOf('.');
-		// TODO here's another example of a ternary:
-		// return i > 0 ? path.substring(i+1) : "";
-		if (i > 0) {
-			extension = path.substring(i+1);
-		}
-		return extension;
+		String extension =  i > 0 ? path.substring(i+1) : "";
+		extension = extension.toLowerCase();
+
+		return (extension.equals("txt") || extension.equals("text"));
+
 	}
 
 	/**
@@ -63,26 +61,23 @@ public class FileFinder {
 	 * directory if the path points to one
 	 *
 	 * @param textPath the path to find the files
-	 * @param indexPath the path to output the index
 	 * @param index the index to parse the files into
 	 * @param isDirectory indicates whether the textPath points to a directory or not
 	 * @throws IOException when an IO error occurs
 	 */
-	public static void findAndInput(Path textPath, Path indexPath, WordIndex index, boolean isDirectory) throws IOException {
+	public static void findAndInput(Path textPath, WordIndex index, boolean isDirectory) throws IOException {
 		// TODO: instead of isDirectory, it's really about whether to ignore file extension
+		// XXX ^ what do you mean by this? suggestions?
 		if (Files.isDirectory(textPath)) {
 			try (Stream<Path> files = Files.walk(textPath)) {
 				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
 				Collections.sort(paths);
 				for (int i = 0; i < paths.size(); i++) {
-					findAndInput(paths.get(i), indexPath, index, isDirectory);
+					findAndInput(paths.get(i), index, isDirectory);
 				}
 			}
 		} else if (Files.isReadable(textPath)) {
-			// TODO abstract this out into isTextFile method
-			String extension = fileExtension(textPath);
-			extension = extension.toLowerCase();
-			if (isDirectory && (extension.equals("txt") || extension.equals("text"))) {
+			if (isDirectory && isTextFile(textPath)) {
 				// TODO call index.inputFile(textPath)
 				inputFile(textPath, index);
 			}

@@ -23,6 +23,15 @@ import java.util.TreeSet;
  */
 public class Driver {
 
+	/** Default path to output the index */
+	private static Path DEFAULT_INDEX_PATH = Path.of("index.json");
+
+	/** Default path to output the counts file */
+	private static Path DEFAULT_COUNTS_PATH = Path.of("counts.json");
+
+	/** Default path to output the results file */
+	private static Path DEFAULT_RESULTS_PATH = Path.of("results.json");
+
 	/**
 	 * Initializes the classes necessary based on the provided command-line
 	 * arguments. This includes (but is not limited to) how to build or search an
@@ -47,9 +56,8 @@ public class Driver {
 
 		Path textPath = null;
 		// TODO: should be able to remove this
+		// XXX ^ removing this causes problems with .md files, sometimes they should be included, others not
 		boolean isDirectory  = false;
-		// TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
-		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
 			// TODO: should be able to remove this
 			if (Files.isDirectory(textPath)) {
@@ -57,12 +65,13 @@ public class Driver {
 			}
 
 			try {
-				FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
+				FileFinder.findAndInput(textPath, index, isDirectory);
 			} catch (IOException e) {
 				System.out.println("Could not walk file path!");
 			}
 		}
 
+		Path indexPath = DEFAULT_INDEX_PATH;
 		if (flags.hasFlag("-index")) {
 			indexPath = flags.getPath("-index", indexPath);
 
@@ -73,8 +82,7 @@ public class Driver {
 			}
 		}
 
-		// TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
-		Path countsPath = Path.of("counts.json"); // default path
+		Path countsPath = DEFAULT_COUNTS_PATH;
 		if (flags.hasFlag("-counts")) {
 			countsPath = flags.getPath("-counts", countsPath);
 			try {
@@ -85,20 +93,12 @@ public class Driver {
 		}
 
 		Path queryPath = null;
-		// TODO: let's store any default values in global constants (e.g. DEFAULT_INDEX_PATH)
-		Path resultsPath = Path.of("results.json");
+		Path resultsPath = DEFAULT_RESULTS_PATH;
 		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
-			// TODO try a ternary operator? e.g. boolean exact = flags.hasFlag("-exact") ? true : false;
-			boolean exact = false;
-			if (flags.hasFlag("-exact")) {
-				exact = true;
-			}
+			boolean exact = flags.hasFlag("-exact") ? true : false;
 
-			try {
-				// TODO remember to put BufferedReaders inside the try-with-resources
-				// Otherwise you have to remember to close it
-				BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);
+			try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);){
 				// TODO try `while((line = reader.readLine()) != null) {`
 				while (reader.ready()) {
 					// TODO: let's move any search functionality (e.g. parsing/cleaning/looping over lines etc) into a method in WordSearcher
@@ -120,7 +120,7 @@ public class Driver {
 		if (flags.hasFlag("-results")) {
 			resultsPath = flags.getPath("-results", resultsPath);
 			try {
-				PrettyJsonWriter.writeResults(searchResults, resultsPath, 0);
+				PrettyJsonWriter.writeNestedMap(searchResults, resultsPath, 0);
 			} catch (IOException e) {
 				System.out.println("Error writing results to path: " + resultsPath);
 			}

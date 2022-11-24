@@ -132,7 +132,9 @@ public interface InvertedIndex<E> {
 	public Map<Path, ? extends Collection<? extends Number>> get(String word);
 
 	/**
-	 * Returns a copy of the positions for a word in a given location in the index
+	 * Returns a copy of the positions for a word in a given location in the index.
+	 * If either the word or the location do not exist in the index, {@code null} is
+	 * returned.
 	 * @param word the word to get the positions of
 	 * @param location the specific location of the word to get the positions of
 	 * @return a copy of the positions for a word in a given location in the index
