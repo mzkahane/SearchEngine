@@ -19,7 +19,7 @@
 		</Logger>
 		
 		<Logger name="ThreadSafeFileFinder" level="DEBUG" additivity="false">
-			<AppenderRef ref="Console" />
+			<AppenderRef ref="FileLog" />
 		</Logger>
 		
 		<Logger name="ThreadSafeWordSearcher" level="DEBUG" additivity="false">
