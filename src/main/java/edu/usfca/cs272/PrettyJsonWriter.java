@@ -259,8 +259,7 @@ public class PrettyJsonWriter {
 	 * @see #writeObject(Map, Writer, int)
 	 */
 	public static String writeObject(Map<String, ? extends Number> elements) {
-		try {
-			StringWriter writer = new StringWriter();
+		try (StringWriter writer = new StringWriter()) {
 			writeObject(elements, writer, 0);
 			return writer.toString();
 		}
@@ -338,8 +337,7 @@ public class PrettyJsonWriter {
 	 */
 	public static String writeNestedArrays(
 			TreeMap<Path, ? extends Collection<? extends Number>> elements) {
-		try {
-			StringWriter writer = new StringWriter();
+		try (StringWriter writer = new StringWriter()) {
 			writeNestedArrays(elements, writer, 0);
 			return writer.toString();
 		}
@@ -448,8 +446,7 @@ public class PrettyJsonWriter {
 	 */
 	public static String writeNestedObjects(
 			Collection<? extends Map<String, ? extends Number>> elements) {
-		try {
-			StringWriter writer = new StringWriter();
+		try (StringWriter writer = new StringWriter()) {
 			writeNestedObjects(elements, writer, 0);
 			return writer.toString();
 		}
