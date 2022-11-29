@@ -18,11 +18,11 @@
 			<AppenderRef ref="FileLog" level="ALL" />
 		</Logger>
 		
-		<Logger name="ThreadSafeFileFinder" level="DEBUG" additivity="false">
+		<Logger name="MultithreadedFileFinder" level="DEBUG" additivity="false">
 			<AppenderRef ref="FileLog" />
 		</Logger>
 		
-		<Logger name="ThreadSafeWordSearcher" level="DEBUG" additivity="false">
+		<Logger name="MultithreadedWordSearcher" level="DEBUG" additivity="false">
 			<AppenderRef ref="FileLog" />
 		</Logger>
 

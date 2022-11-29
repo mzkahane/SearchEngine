@@ -75,8 +75,8 @@ public class Driver {
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
 			log.debug("Text flag found");
 			if (multithreaded) {
-				log.debug("Passing textPath to ThreadSafeFileFinder...");
-				ThreadSafeFileFinder.findAndInput(textPath, (ThreadSafeIndex)index, isDirectory, threadCount);
+				log.debug("Passing textPath to MultithreadedFileFinder...");
+				MultithreadedFileFinder.findAndInput(textPath, (ThreadSafeIndex)index, isDirectory, threadCount);
 			} else {
 				if (Files.isDirectory(textPath)) {
 					log.debug("textPath points to a directory");
@@ -131,8 +131,8 @@ public class Driver {
 			}
 
 			if(multithreaded) {
-				log.debug("Passing queryPath to ThreadSafeWordSearcher...");
-				ThreadSafeWordSearcher.search(queryPath, (ThreadSafeIndex) index, searchResults, exact, threadCount);
+				log.debug("Passing queryPath to MultithreadedWordSearcher...");
+				MultithreadedWordSearcher.search(queryPath, (ThreadSafeIndex) index, searchResults, exact, threadCount);
 			} else {
 				log.debug("Cleaning query, Searching index, and putting searchResults...");
 				try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {

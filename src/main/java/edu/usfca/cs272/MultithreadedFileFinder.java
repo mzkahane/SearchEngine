@@ -18,10 +18,10 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Matthew Kahane
  */
-public class ThreadSafeFileFinder extends FileFinder {
+public class MultithreadedFileFinder extends FileFinder {
 
 	/** Logger used throughout this class */
-	private static final Logger log = LogManager.getLogger("ThreadSafeFileFinder");
+	private static final Logger log = LogManager.getLogger("MultithreadedFileFinder");
 
 	/**
 	 * Returns true if the path points to a .txt or .text file, otherwise returns false

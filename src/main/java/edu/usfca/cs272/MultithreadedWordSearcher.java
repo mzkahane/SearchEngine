@@ -23,10 +23,10 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Matthew Kahane
  */
-public class ThreadSafeWordSearcher extends WordSearcher {
+public class MultithreadedWordSearcher extends WordSearcher {
 
 	/** Logger used throughout this class */
-	public static final Logger log = LogManager.getLogger("ThreadSafeWordSearcher");
+	public static final Logger log = LogManager.getLogger("MultithreadedWordSearcher");
 
 	/**
 	 * Takes a path input to parse one or more search queries from. For each query,
@@ -66,7 +66,7 @@ public class ThreadSafeWordSearcher extends WordSearcher {
 	}
 
 	/**
-	 * Creates tasks to be run by workers in the queue. See {@link ThreadSafeWordSearcher#search}
+	 * Creates tasks to be run by workers in the queue. See {@link MultithreadedWordSearcher#search}
 	 *
 	 * @author Matthew Kahane
 	 */
