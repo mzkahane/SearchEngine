@@ -1,11 +1,8 @@
-package edu.usfca.cs272;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+	package edu.usfca.cs272;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,34 +21,15 @@ public class FileFinder {
 	 * @param textPath the path that points to the file
 	 * @return a string containing the file extension
 	 */
-	public static String fileExtension(Path textPath) {
-		String extension = "";
+	public static boolean isTextFile(Path textPath) {
 		String path = textPath.toString();
 
 		int i = path.lastIndexOf('.');
-		if (i > 0) {
-			extension = path.substring(i+1);
-		}
-		return extension;
-	}
+		String extension =  i > 0 ? path.substring(i+1) : "";
+		extension = extension.toLowerCase();
 
-	/**
-	 * Inputs the contents of a file to the word index
-	 * @param path the path where the file is found
-	 * @param index the index to input the contents into
-	 * @throws IOException if an IO error occurs
-	 */
-	public static void inputFile(Path path, WordIndex index) throws IOException {
-		String text = Files.readString(path, UTF_8);
-		ArrayList<String> cleanedWords = WordCleaner.listStems(text);
+		return (extension.equals("txt") || extension.equals("text"));
 
-		if (cleanedWords.size() > 0) {
-			index.addWordCount(path.toString(), cleanedWords.size());
-		}
-
-		for (int i = 0; i < cleanedWords.size(); i++) {
-			index.add(cleanedWords.get(i), path, i+1);
-		}
 	}
 
 	/**
@@ -59,28 +37,25 @@ public class FileFinder {
 	 * directory if the path points to one
 	 *
 	 * @param textPath the path to find the files
-	 * @param indexPath the path to output the index
 	 * @param index the index to parse the files into
-	 * @param isDirectory indicates whether the textPath points to a directory or not
+	 * @param strictTextTest indicates whether the textPath points to a directory or not
 	 * @throws IOException when an IO error occurs
 	 */
-	public static void findAndInput(Path textPath, Path indexPath, WordIndex index, boolean isDirectory) throws IOException {
+	public static void findAndInput(Path textPath, WordIndex index, boolean strictTextTest) throws IOException {
 		if (Files.isDirectory(textPath)) {
 			try (Stream<Path> files = Files.walk(textPath)) {
 				List<Path> paths = files.filter(Files::isRegularFile).collect(Collectors.toList());
 				Collections.sort(paths);
 				for (int i = 0; i < paths.size(); i++) {
-					findAndInput(paths.get(i), indexPath, index, isDirectory);
+					findAndInput(paths.get(i), index, strictTextTest);
 				}
 			}
 		} else if (Files.isReadable(textPath)) {
-			String extension = fileExtension(textPath);
-			extension = extension.toLowerCase();
-			if (isDirectory && (extension.equals("txt") || extension.equals("text"))) {
-				inputFile(textPath, index);
+			if (strictTextTest && isTextFile(textPath)) {
+				index.inputFile(textPath);
 			}
-			if (!isDirectory) {
-				inputFile(textPath, index);
+			if (!strictTextTest) {
+				index.inputFile(textPath);
 			}
 		} else {
 			System.out.println("invalid path");

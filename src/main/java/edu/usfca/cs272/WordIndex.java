@@ -1,5 +1,6 @@
 package edu.usfca.cs272;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,35 +46,16 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public void add(String word, Path location, ArrayList<Integer> positions) {
-		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
-			temp.put(location, positions);
-			index.put(word, temp);
-		} else if (!index.get(word).containsKey(location)) {
-			index.get(word).put(location, positions);
-		} else {
-			index.get(word).get(location).addAll(positions);
-		}
-
+		 index.putIfAbsent(word, new TreeMap<Path, ArrayList<Integer>>());
+		 index.get(word).putIfAbsent(location, positions);
+		 index.get(word).get(location).addAll(positions);
 	}
 
 	@Override
 	public void add(String word, Path location, Integer position) {
-		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
-			temp.put(location, new ArrayList<Integer>());
-
-			ArrayList<Integer> array = temp.get(location);
-			array.add(position);
-
-			index.putIfAbsent(word, temp);
-		} else if (!index.get(word).containsKey(location)) {
-			ArrayList<Integer> array = new ArrayList<Integer>();
-			array.add(position);
-			index.get(word).putIfAbsent(location, array);
-		} else {
-			index.get(word).get(location).add(position);
-		}
+		index.putIfAbsent(word, new TreeMap<Path, ArrayList<Integer>>());
+		index.get(word).putIfAbsent(location, new ArrayList<Integer>());
+		index.get(word).get(location).add(position);
 	}
 
 	@Override
@@ -83,12 +65,20 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public int size(String word) {
-		return index.get(word).size();
+		if (has(word)) {
+			return index.get(word).size();
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
 	public int size(String word, Path location) {
-		return index.get(word).get(location).size();
+		if (has(word, location)) {
+			return index.get(word).get(location).size();
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
@@ -98,18 +88,12 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public boolean has(String word, Path location) {
-		if (has(word)) {
-			return index.get(word).containsKey(location);
-		}
-		return false;
+		return has(word) ? index.get(word).containsKey(location) : false;
 	}
 
 	@Override
 	public boolean has(String word, Path location, Integer position) {
-		if (has(word, location)) {
-			return index.get(word).get(location).contains(position);
-		}
-		return false;
+		return has(word, location) ? index.get(word).get(location).contains(position) : false;
 	}
 
 	@Override
@@ -132,7 +116,7 @@ public class WordIndex implements InvertedIndex<Path> {
 			ArrayList<Integer> empty = new ArrayList<Integer>();
 			return empty;
 		}
-		return null;
+		return Collections.unmodifiableCollection(index.get(word).get(location));
 	}
 
 	@Override
@@ -146,7 +130,11 @@ public class WordIndex implements InvertedIndex<Path> {
 
 	@Override
 	public ArrayList<Integer> get(String word, Path location) {
-		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+		if (has(word, location)) {
+			return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -182,5 +170,23 @@ public class WordIndex implements InvertedIndex<Path> {
 	 */
 	public Map<String, Integer> getWordCounts() {
 		return Collections.unmodifiableSortedMap(counts);
+	}
+
+	/**
+	 * Inputs the contents of a file to the index
+	 *
+	 * @param path the path where the file is found
+	 * @throws IOException if an IO error occurs
+	 */
+	public void inputFile(Path path) throws IOException {
+		ArrayList<String> cleanedWords = WordCleaner.listStems(path);
+
+		if (cleanedWords.size() > 0) {
+			this.addWordCount(path.toString(), cleanedWords.size());
+		}
+
+		for (int i = 0; i < cleanedWords.size(); i++) {
+			this.add(cleanedWords.get(i), path, i+1);
+		}
 	}
 }

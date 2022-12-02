@@ -9,9 +9,8 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -396,7 +395,7 @@ public class PrettyJsonWriter {
 	 * @throws IOException if an IO error occurs
 	 */
 	public static void writeNestedStringObjects(
-			ArrayList<? extends Map<String, String>> elements,
+			List<? extends Map<String, String>> elements,
 			Writer writer, int indent) throws IOException {
 		writer.write("[\n");
 		var iterator = elements.iterator();
@@ -466,6 +465,9 @@ public class PrettyJsonWriter {
 	 * @param indent the level of indent
 	 * @throws IOException when an IO error occurs
 	 */
+	// TODO can we make this more general purpose? by calling elements.view() outside of the method and pass it in as a parameter
+	// XXX can't think of a way to do this (line 480 causes issues)
+	// Map<String, ? extends Map<Path, ? extends List<? extends Number>>>
 	public static void writeIndex(WordIndex elements, Path path, int indent) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");
@@ -497,7 +499,7 @@ public class PrettyJsonWriter {
 	 *   the initial indentation level
 	 * @throws IOException when an IO error occurs
 	 */
-	public static void writeResults(TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults,
+	public static void writeNestedMap(Map<String, ? extends List< ? extends Map<String, String>>> searchResults,
 			Path path, int indent) throws IOException {
 		try(BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");

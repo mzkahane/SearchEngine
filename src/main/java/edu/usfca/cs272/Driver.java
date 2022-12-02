@@ -1,8 +1,5 @@
 package edu.usfca.cs272;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Class responsible for running this project based on the provided command-line
@@ -22,6 +18,15 @@ import java.util.TreeSet;
  * @version Fall 2022
  */
 public class Driver {
+
+	/** Default path to output the index */
+	private static Path DEFAULT_INDEX_PATH = Path.of("index.json");
+
+	/** Default path to output the counts file */
+	private static Path DEFAULT_COUNTS_PATH = Path.of("counts.json");
+
+	/** Default path to output the results file */
+	private static Path DEFAULT_RESULTS_PATH = Path.of("results.json");
 
 	/**
 	 * Initializes the classes necessary based on the provided command-line
@@ -46,20 +51,15 @@ public class Driver {
 		WordIndex index = new WordIndex();
 
 		Path textPath = null;
-		boolean isDirectory  = false;
-		Path indexPath = Path.of("index.json"); // default path
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
-			if (Files.isDirectory(textPath)) {
-				isDirectory = true;
-			}
-
 			try {
-				FileFinder.findAndInput(textPath, indexPath, index, isDirectory);
+				FileFinder.findAndInput(textPath, index, Files.isDirectory(textPath));
 			} catch (IOException e) {
 				System.out.println("Could not walk file path!");
 			}
 		}
 
+		Path indexPath = DEFAULT_INDEX_PATH;
 		if (flags.hasFlag("-index")) {
 			indexPath = flags.getPath("-index", indexPath);
 
@@ -70,7 +70,7 @@ public class Driver {
 			}
 		}
 
-		Path countsPath = Path.of("counts.json"); // default path
+		Path countsPath = DEFAULT_COUNTS_PATH;
 		if (flags.hasFlag("-counts")) {
 			countsPath = flags.getPath("-counts", countsPath);
 			try {
@@ -81,27 +81,11 @@ public class Driver {
 		}
 
 		Path queryPath = null;
-		Path resultsPath = Path.of("results.json");
+		Path resultsPath = DEFAULT_RESULTS_PATH;
 		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
-			boolean exact = false;
-			if (flags.hasFlag("-exact")) {
-				exact = true;
-			}
-
-			try {
-				BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);
-				while (reader.ready()) {
-					TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
-					if (cleanedQuery.size() > 0) {
-						var result = WordSearcher.search(cleanedQuery, index, exact);
-						String joinedQuery = String.join(" ", cleanedQuery);
-						searchResults.put(joinedQuery, result);
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Something went wrong processing -query");
-			}
+			boolean exact = flags.hasFlag("-exact") ? true : false;
+			WordSearcher.search(queryPath, index, searchResults, exact);
 		} else if (queryPath == null) {
 			System.out.println("please specify a path to go along with the -query flag");
 		}
@@ -109,7 +93,7 @@ public class Driver {
 		if (flags.hasFlag("-results")) {
 			resultsPath = flags.getPath("-results", resultsPath);
 			try {
-				PrettyJsonWriter.writeResults(searchResults, resultsPath, 0);
+				PrettyJsonWriter.writeNestedMap(searchResults, resultsPath, 0);
 			} catch (IOException e) {
 				System.out.println("Error writing results to path: " + resultsPath);
 			}

@@ -92,31 +92,16 @@ public class ArgumentParser {
 			}
 			return; // if the one argument is not a flag, do nothing
 		}
-		int j = 1; // current value pointer
 		for(int i = 0; i <= args.length-1; i++) { // current key pointer
 			String key = args[i];
-			String value = args[j];
+			String value = (i == args.length-1) ? null : args[i+1];
 			if(isFlag(key)) {
-				if(!map.containsKey(key)) {
-					if(isValue(value)) {
-						map.put(key, value); // if the key is new and the value is valid, insert
-						i++;				 // ... and move the pointers an extra index
-						j++;
-					} else {
-						map.put(key, null); // if not pointing at a valid value, insert null instead.
-					}
+				if(isValue(value)) {
+					map.put(key, value); // if the key is new and the value is valid, insert
+					i++;				 // ... and move the pointers an extra index
 				} else {
-					if(isValue(value)) {
-						map.replace(key, value);
-						i++;
-						j++;
-					} else {
-						map.replace(key, null);
-					}
+					map.put(key, null); // if not pointing at a valid value, insert null instead.
 				}
-			}
-			if(j < args.length-1) { //increments the current value pointer to stay one ahead of i
-				j++;
 			}
 		}
 		return;
@@ -159,10 +144,8 @@ public class ArgumentParser {
 			throw new IllegalArgumentException("Argument is not a flag");
 		}
 
-		if(map.containsKey(flag)) {
-			if(map.get(flag) != null) {
-				return true;
-			}
+		if(map.get(flag) != null) {
+			return true;
 		}
 		return false;
 	}
@@ -181,10 +164,8 @@ public class ArgumentParser {
 			throw new IllegalArgumentException("Argument is not a flag");
 		}
 
-		if(map.containsKey(flag)) { // check to see if the flag exists in the map
-			if(map.get(flag) != null) { // check that the value is not empty/null
-				return map.get(flag);
-			}
+		if(map.get(flag) != null) { // check that the value is not empty/null
+			return map.get(flag);
 		}
 		return backup;
 	}
@@ -267,7 +248,7 @@ public class ArgumentParser {
 			try { // try to convert the value from string to int, if it fails, then its not a number
 				val = Integer.parseInt(map.get(flag));
 			} catch (NumberFormatException e) {
-				val = 0; // .. in that case, return the default 0
+				val = backup; // .. in that case, return the backup
 			}
 
 			return val;
