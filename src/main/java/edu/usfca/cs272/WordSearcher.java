@@ -30,7 +30,6 @@ public class WordSearcher {
 	 * one of the query words.
 	 */
 	private static LinkedHashMap<Path, Integer> findResults(TreeSet<String> query, WordIndex index, boolean exact) {
-		// TODO add more in-line comments on what's going on
 		// TODO merge the top and bottom clauses of the outer if statement because they're pretty similar
 		// checking for if(exact) should happen inside
 		// XXX help me do this
@@ -38,23 +37,25 @@ public class WordSearcher {
 		if (exact) {
 			for (String word : query) {
 				if (index.has(word)) {
-					var temp = index.get(word);
+					var temp = index.get(word); //get the map of paths -> positons for the word
 
 					for (Path location : temp.keySet()) {
 						if (results.containsKey(location)) {
+							// if the location is already in the map, update the count
 							int newCount = results.get(location) + index.size(word, location);
 							results.put(location, newCount);
 						} else if (!results.containsKey(location)) {
+							// add that location and the number of appearances to the map of results
 							results.put(location, index.size(word, location));
 						}
 					}
 				}
 			}
 		} else {
-			Set<String> indexKeys = index.getKeys();
+			Set<String> indexKeys = index.getKeys(); // contains all the words in the index
 			for (String word : query) {
 				for (String key : indexKeys) {
-					if (key.startsWith(word)) {
+					if (key.startsWith(word)) { // if the word from the index starts with the stem of the query...
 						var temp = index.get(key);
 
 						for (Path location : temp.keySet()) {
