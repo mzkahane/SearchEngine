@@ -1,9 +1,16 @@
 package edu.usfca.cs272;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -26,6 +33,7 @@ public class WordSearcher {
 		// TODO add more in-line comments on what's going on
 		// TODO merge the top and bottom clauses of the outer if statement because they're pretty similar
 		// checking for if(exact) should happen inside
+		// XXX help me do this
 		LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
 		if (exact) {
 			for (String word : query) {
@@ -72,53 +80,47 @@ public class WordSearcher {
 	 * Outer LinkedHashMap maps the query to the inner LinkedHashMap.
 	 * Inner LinkedHashMap contains the count, score, and path of each result.
 	 *
-	 * @param query the set of unique stems to search on
+	 * @param queryPath the path at which the file containing the queries can be found
 	 * @param index the index for reference words, locations, and positions
+	 * @param searchResults the map to add the search results to
 	 * @param exact flag to mark if an exact search should be performed or not
-	 *
-	 * @return A LinkedHashMap containing the results of the search
 	 */
-	public static ArrayList<LinkedHashMap<String, String>> search
-	(TreeSet<String> query, WordIndex index, boolean exact) {
-		LinkedHashMap<Path, Integer> results = findResults(query, index, exact);
-		ArrayList<LinkedHashMap<String, String>> scoredResults = new ArrayList<>();
+	public static void search
+	(Path queryPath, WordIndex index, TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults, boolean exact) {
+		LinkedHashMap<Path, Integer> results = null;
+		TreeSet<String> cleanedQuery = null;
+		try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8)) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				cleanedQuery = WordCleaner.uniqueStems(line);
+				if (cleanedQuery.size() > 0) {
+					results = findResults(cleanedQuery, index, exact);
 
-		Path location;
-		for (Path path : results.keySet()) {
-			location = path;
-			var temp = new LinkedHashMap<String, String>();
-			int appearances = results.get(location);
-			temp.put("count", String.format("%d", appearances));
-			temp.put("score", String.format("%.8f", (double) appearances/index.getWordCount(location.toString())));
-			temp.put("where", ('"' + location.toString() + '"'));
+					ArrayList<LinkedHashMap<String, String>> scoredResults = new ArrayList<>();
+					assert results != null;
+					ArrayList<SearchResult> temp = new ArrayList<>();
+					Path location;
+					for (Path path : results.keySet()) {
+						location = path;
 
-			// TODO we had floats before, so calculating j here is more complicated, because you have to parse it back from a String
-			// TODO create a SearchResult class that implements Comparable, then I can call Collections.sort(scoredResults)
-			// - hint: take advantage of Integer.compare or Double.compare
-			int j = scoredResults.size();
-			for (int i = 0; i < scoredResults.size(); i++) {
-				if (Float.parseFloat(scoredResults.get(i).get("score")) < Float.parseFloat(temp.get("score"))) {
-					j = i;
-					break;
-				} else if (Float.parseFloat(scoredResults.get(i).get("score")) == Float.parseFloat(temp.get("score"))) {
-					if (Float.parseFloat(scoredResults.get(i).get("count")) < Float.parseFloat(temp.get("count"))) {
-						j = i;
-						break;
-					} else if (Float.parseFloat(scoredResults.get(i).get("count")) > Float.parseFloat(temp.get("count"))) {
-						j = i+1;
-						break;
-					} else if (scoredResults.get(i).get("where").compareToIgnoreCase(temp.get("where")) < 0) {
-						j = i+1;
-						break;
-					} else {
-						j = i;
-						break;
+						int appearances = results.get(location);
+						SearchResult result = new SearchResult(appearances, ((double)appearances/index.getWordCount(location.toString())), location.toString());
+						temp.add(result);
 					}
+
+					Collections.sort(temp);
+					for (SearchResult result : temp) {
+						scoredResults.add(result.format());
+					}
+
+					assert cleanedQuery != null;
+					String joinedQuery = String.join(" ", cleanedQuery);
+					searchResults.put(joinedQuery, scoredResults);
 				}
 			}
-			scoredResults.add(j, temp);
+		} catch (IOException e) {
+			System.out.println("Something went wrong processing -query");
 		}
-		return scoredResults;
 	}
 }
 

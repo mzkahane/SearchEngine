@@ -1,8 +1,5 @@
 package edu.usfca.cs272;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Class responsible for running this project based on the provided command-line
@@ -55,17 +51,9 @@ public class Driver {
 		WordIndex index = new WordIndex();
 
 		Path textPath = null;
-		// TODO: should be able to remove this
-		// XXX ^ removing this causes problems with .md files, sometimes they should be included, others not
-		boolean isDirectory  = false;
 		if (flags.hasFlag("-text") && (textPath = flags.getPath("-text")) != null) {
-			// TODO: should be able to remove this
-			if (Files.isDirectory(textPath)) {
-				isDirectory = true;
-			}
-
 			try {
-				FileFinder.findAndInput(textPath, index, isDirectory);
+				FileFinder.findAndInput(textPath, index, Files.isDirectory(textPath));
 			} catch (IOException e) {
 				System.out.println("Could not walk file path!");
 			}
@@ -97,22 +85,7 @@ public class Driver {
 		TreeMap<String, ArrayList<LinkedHashMap<String, String>>> searchResults = new TreeMap<>();
 		if (flags.hasFlag("-query") && (queryPath = flags.getPath("-query")) != null) {
 			boolean exact = flags.hasFlag("-exact") ? true : false;
-
-			try (BufferedReader reader = Files.newBufferedReader(queryPath, UTF_8);){
-				// TODO try `while((line = reader.readLine()) != null) {`
-				while (reader.ready()) {
-					// TODO: let's move any search functionality (e.g. parsing/cleaning/looping over lines etc) into a method in WordSearcher
-					// so that the Driver can just focus on the minimal argument parsing + calling methods
-					TreeSet<String> cleanedQuery = WordCleaner.uniqueStems(reader.readLine());
-					if (cleanedQuery.size() > 0) {
-						var result = WordSearcher.search(cleanedQuery, index, exact);
-						String joinedQuery = String.join(" ", cleanedQuery);
-						searchResults.put(joinedQuery, result);
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Something went wrong processing -query");
-			}
+			WordSearcher.search(queryPath, index, searchResults, exact);
 		} else if (queryPath == null) {
 			System.out.println("please specify a path to go along with the -query flag");
 		}

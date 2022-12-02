@@ -1,5 +1,6 @@
 package edu.usfca.cs272;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -123,8 +124,6 @@ public class WordIndex implements InvertedIndex<Path> {
 		if (index.get(word) == null) {
 			return null;
 		}
-		// TODO (optional) - technically this is a shallow copy
-		// to properly deep copy, you have to iterate over all your values and clone those lists as well
 		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(word));
 		return out;
 	}
@@ -171,5 +170,23 @@ public class WordIndex implements InvertedIndex<Path> {
 	 */
 	public Map<String, Integer> getWordCounts() {
 		return Collections.unmodifiableSortedMap(counts);
+	}
+
+	/**
+	 * Inputs the contents of a file to the index
+	 *
+	 * @param path the path where the file is found
+	 * @throws IOException if an IO error occurs
+	 */
+	public void inputFile(Path path) throws IOException {
+		ArrayList<String> cleanedWords = WordCleaner.listStems(path);
+
+		if (cleanedWords.size() > 0) {
+			this.addWordCount(path.toString(), cleanedWords.size());
+		}
+
+		for (int i = 0; i < cleanedWords.size(); i++) {
+			this.add(cleanedWords.get(i), path, i+1);
+		}
 	}
 }

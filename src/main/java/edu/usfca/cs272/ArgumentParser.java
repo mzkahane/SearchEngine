@@ -92,37 +92,16 @@ public class ArgumentParser {
 			}
 			return; // if the one argument is not a flag, do nothing
 		}
-		// TODO: instead of storing j, maybe let's just use `i+1` where we want it.
-		// - with separate i and j variables, it's easy to introduce a bug where the invariant j = i + 1 get invalidated
-		// - at the very least, you should add an assert that makes sure that remains true
-		// XXX ^ causes indexOutofBounds
-		int j = 1; // current value pointer
 		for(int i = 0; i <= args.length-1; i++) { // current key pointer
 			String key = args[i];
-			String value = args[j];
+			String value = (i == args.length-1) ? null : args[i+1];
 			if(isFlag(key)) {
-				// TODO I don't think this if statement is necessary because map.put will effectively `replace` if the key already exists
-				// XXX ^ did this and it broke
-				if(!map.containsKey(key)) {
-					if(isValue(value)) {
-						map.put(key, value); // if the key is new and the value is valid, insert
-						i++;				 // ... and move the pointers an extra index
-						j++;
-					} else {
-						map.put(key, null); // if not pointing at a valid value, insert null instead.
-					}
+				if(isValue(value)) {
+					map.put(key, value); // if the key is new and the value is valid, insert
+					i++;				 // ... and move the pointers an extra index
 				} else {
-					if(isValue(value)) {
-						map.replace(key, value);
-						i++;
-						j++;
-					} else {
-						map.replace(key, null);
-					}
+					map.put(key, null); // if not pointing at a valid value, insert null instead.
 				}
-			}
-			if(j < args.length-1) { //increments the current value pointer to stay one ahead of i
-				j++;
 			}
 		}
 		return;

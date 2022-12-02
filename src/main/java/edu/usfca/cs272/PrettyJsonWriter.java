@@ -466,7 +466,8 @@ public class PrettyJsonWriter {
 	 * @throws IOException when an IO error occurs
 	 */
 	// TODO can we make this more general purpose? by calling elements.view() outside of the method and pass it in as a parameter
-	// XXX ^ explain?
+	// XXX can't think of a way to do this (line 480 causes issues)
+	// Map<String, ? extends Map<Path, ? extends List<? extends Number>>>
 	public static void writeIndex(WordIndex elements, Path path, int indent) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");
