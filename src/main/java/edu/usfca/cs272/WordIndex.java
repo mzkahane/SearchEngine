@@ -25,6 +25,7 @@ public class WordIndex implements InvertedIndex<Path> {
 	 * Outer HashMap maps the word to the inner HashMap. Inner HashMap maps
 	 * each path to the positions of that word found in the file at that path.
 	 */
+	// TODO might need to change from path to string so urls can be stored as locations
 	private final TreeMap<String, TreeMap<Path, ArrayList<Integer>>> index;
 
 	/**
