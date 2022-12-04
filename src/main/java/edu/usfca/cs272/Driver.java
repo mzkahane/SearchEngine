@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -67,6 +68,33 @@ public class Driver {
 			index = new ThreadSafeIndex(threadCount);
 		} else {
 			index = new WordIndex();
+		}
+
+		int maxCrawls = 1;
+		if (flags.hasFlag("-html")) {
+			multithreaded = true;
+			index = new ThreadSafeIndex(threadCount);
+
+			//TODO use sockets to download HTML, following up to 3 redirects
+			// each worker gets 1 URL, the redirected content is attatched to the original URL
+			if (flags.hasFlag("-max")) {
+				maxCrawls = flags.getInteger("-max", 1);
+				// The max number of links to be crawled.
+				// if the number is 3, then the seed link as well as the first 2 links found on that page are to be crawled
+			}
+			String seed = flags.getString("-html");
+			if (seed != null) {
+				try {
+					// maxCrawls-1 because the seed counts as one of the crawls? (might need to revert depending on how the inner loop works
+					WebCrawler.indexHTML(seed, maxCrawls-1, (ThreadSafeIndex) index);
+				} catch (MalformedURLException e) {
+					System.out.println("The URL :" + seed + "is malformed");
+					log.catching(e);
+				}
+			} else {
+				System.out.println("-html flag must be followed by a URL");
+				log.debug("No URL following -html flag");
+			}
 		}
 
 		Path textPath = null;
