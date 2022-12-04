@@ -1,6 +1,5 @@
 package edu.usfca.cs272;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -31,14 +30,14 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public void add (String word, Path location, ArrayList<Integer> positions) {
+	public void add (String word, String location, ArrayList<Integer> positions) {
 		lock.write().lock();
 		super.add(word, location, positions);
 		lock.write().unlock();
 	}
 
 	@Override
-	public void add (String word, Path location, Integer position) {
+	public void add (String word, String location, Integer position) {
 		lock.write().lock();
 		super.add(word, location, position);
 		lock.write().unlock();
@@ -61,7 +60,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public int size(String word, Path location) {
+	public int size(String word, String location) {
 		lock.read().lock();
 		int size = super.size(word, location);
 		lock.read().unlock();
@@ -77,7 +76,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public boolean has(String word, Path location) {
+	public boolean has(String word, String location) {
 		lock.read().lock();
 		boolean has = super.has(word, location);
 		lock.read().unlock();
@@ -85,7 +84,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public boolean has(String word, Path location, Integer position) {
+	public boolean has(String word, String location, Integer position) {
 		lock.read().lock();
 		boolean has = super.has(word, location, position);
 		lock.read().unlock();
@@ -101,7 +100,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public Collection<Path> view(String word) {
+	public Collection<String> view(String word) {
 		lock.read().lock();
 		var view = super.view(word);
 		lock.read().unlock();
@@ -109,7 +108,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public Collection<Integer> view(String word, Path location) {
+	public Collection<Integer> view(String word, String location) {
 		lock.read().lock();
 		var view = super.view(word, location);
 		lock.read().unlock();
@@ -117,7 +116,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public TreeMap<Path, ? extends Collection<? extends Number>> get(String word) {
+	public TreeMap<String, ? extends Collection<? extends Number>> get(String word) {
 		lock.read().lock();
 		var get = super.get(word);
 		lock.read().unlock();
@@ -125,7 +124,7 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
-	public ArrayList<Integer> get(String word, Path location) {
+	public ArrayList<Integer> get(String word, String location) {
 		lock.read().lock();
 		var get = super.get(word, location);
 		lock.read().unlock();

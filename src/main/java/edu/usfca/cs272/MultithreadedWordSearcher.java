@@ -103,13 +103,13 @@ public class MultithreadedWordSearcher extends WordSearcher {
 
 		@Override
 		public void run() {
-			LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
+			LinkedHashMap<String, Integer> results = new LinkedHashMap<>();
 			if (exact) {
 				for (String word : query) {
 					if (index.has(word)) {
 						var temp = index.get(word);
 
-						for (Path location : temp.keySet()) {
+						for (String location : temp.keySet()) {
 							if (results.containsKey(location)) {
 								int newCount = results.get(location) + index.size(word, location);
 								results.put(location, newCount);
@@ -126,7 +126,7 @@ public class MultithreadedWordSearcher extends WordSearcher {
 						if (key.startsWith(word)) {
 							var temp = index.get(key);
 
-							for (Path location : temp.keySet()) {
+							for (String location : temp.keySet()) {
 								if (results.containsKey(location)) {
 									int newCount = results.get(location) + index.size(key, location);
 									results.put(location, newCount);
@@ -141,14 +141,14 @@ public class MultithreadedWordSearcher extends WordSearcher {
 			log.debug("Finished searching queries");
 			ArrayList<LinkedHashMap<String, String>> scoredResults = new ArrayList<>();
 
-			Path location;
-			for (Path path : results.keySet()) {
+			String location;
+			for (String path : results.keySet()) {
 				location = path;
 				var temp = new LinkedHashMap<String, String>();
 				int appearances = results.get(location);
 				temp.put("count", String.format("%d", appearances));
 				temp.put("score", String.format("%.8f", (double) appearances/index.getWordCount(location.toString())));
-				temp.put("where", ('"' + location.toString() + '"'));
+				temp.put("where", ('"' + location + '"'));
 
 				int j = scoredResults.size();
 				for (int i = 0; i < scoredResults.size(); i++) {

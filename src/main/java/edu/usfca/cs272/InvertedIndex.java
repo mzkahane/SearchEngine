@@ -1,6 +1,5 @@
 package edu.usfca.cs272;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +33,7 @@ public interface InvertedIndex<E> {
 	 * @param location location in which the word is found at the given position
 	 * @param position position of the word in the given location.
 	 */
-	public void add(String word, Path location, Integer position);
+	public void add(String word, E location, Integer position);
 
 	/**
 	 * Returns the number of words stored in the index
@@ -61,7 +60,7 @@ public interface InvertedIndex<E> {
 	 * 	found for that word, otherwise the number of positions stored for that
 	 * 	word.
 	 */
-	public int size(String word, Path location);
+	public int size(String word, E location);
 
 	/**
 	 * Determines whether the word is stored in the index.
@@ -122,14 +121,14 @@ public interface InvertedIndex<E> {
 	 * 	given location of a given word
 	 * @see Collections#unmodifiableCollection(Collection)
 	 */
-	public Collection<Integer> view(String word, Path location);
+	public Collection<Integer> view(String word, E location);
 
 	/**
 	 * Returns a copy of the location-position map for a word in the index
 	 * @param word the word to get the location-position map for
 	 * @return a copy of the location-position map for the word in the index
 	 */
-	public Map<Path, ? extends Collection<? extends Number>> get(String word);
+	public Map<E, ? extends Collection<? extends Number>> get(String word);
 
 	/**
 	 * Returns a copy of the positions for a word in a given location in the index
@@ -137,7 +136,7 @@ public interface InvertedIndex<E> {
 	 * @param location the specific location of the word to get the positions of
 	 * @return a copy of the positions for a word in a given location in the index
 	 */
-	public ArrayList<Integer> get(String word, Path location);
+	public ArrayList<Integer> get(String word, E location);
 
 	/**
 	 * Returns a copy of the keyset of the index

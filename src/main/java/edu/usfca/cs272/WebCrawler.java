@@ -6,8 +6,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+/**
+ * Uses multithreading to crawl a given URL, following links and redirects, to a certain limit, and fetches the HTML
+ * The HTML is then crawled for more links, cleaned, stemmed, and added to the word index
+ *
+ * @author Matthew Kahane
+ */
 public class WebCrawler {
 
+	/**
+	 * Cleans and inputs the HTML into the word index with the URL as the location
+	 *
+	 * @param html the HTML to clean and index
+	 * @param url the location the HTML was found
+	 * @param index the index to input the words from the HTML into
+	 */
 	private static void indexHTML(String html, String url, ThreadSafeIndex index) {
 		// TODO this will handle inputting parsing, cleaning, stemming, and
 		// inputting the html into the index with the url as the location.
@@ -20,7 +33,7 @@ public class WebCrawler {
 		}
 
 		for (int i = 0; i < cleanedWords.size(); i++) {
-			index.add(cleanedWords.get(i), url, i+1); // FIXME index probably has to be changed to have the location be a string to accommodate URL locations
+			index.add(cleanedWords.get(i), url, i+1);
 		}
 	}
 
@@ -57,6 +70,7 @@ public class WebCrawler {
 			 * the location should be the seed (? or the url from the set?)
 			 */
 		}
+		queue.join();
 
 	}
 

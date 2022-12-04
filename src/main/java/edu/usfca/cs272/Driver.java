@@ -50,7 +50,7 @@ public class Driver {
 			return;
 		}
 
-		InvertedIndex<Path> index;
+		InvertedIndex<String> index;
 
 		int threadCount = 5;
 		boolean multithreaded = false;

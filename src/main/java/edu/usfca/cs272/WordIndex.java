@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * @author Matthew Kahane
  *
  */
-public class WordIndex implements InvertedIndex<Path> {
+public class WordIndex implements InvertedIndex<String> {
 
 	/**
 	 * Index to store the given data in.
@@ -26,7 +26,7 @@ public class WordIndex implements InvertedIndex<Path> {
 	 * each path to the positions of that word found in the file at that path.
 	 */
 	// TODO might need to change from path to string so urls can be stored as locations
-	private final TreeMap<String, TreeMap<Path, ArrayList<Integer>>> index;
+	private final TreeMap<String, TreeMap<String, ArrayList<Integer>>> index;
 
 	/**
 	 * Map to store the word counts of the files in the index
@@ -45,9 +45,9 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public void add(String word, Path location, ArrayList<Integer> positions) {
+	public void add(String word, String location, ArrayList<Integer> positions) {
 		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
+			var temp = new TreeMap<String, ArrayList<Integer>>();
 			temp.put(location, positions);
 			index.put(word, temp);
 		} else if (!index.get(word).containsKey(location)) {
@@ -59,9 +59,9 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public void add(String word, Path location, Integer position) {
+	public void add(String word, String location, Integer position) {
 		if (!index.containsKey(word)) {
-			var temp = new TreeMap<Path, ArrayList<Integer>>();
+			var temp = new TreeMap<String, ArrayList<Integer>>();
 			temp.put(location, new ArrayList<Integer>());
 
 			ArrayList<Integer> array = temp.get(location);
@@ -88,7 +88,7 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public int size(String word, Path location) {
+	public int size(String word, String location) {
 		return index.get(word).get(location).size();
 	}
 
@@ -98,7 +98,7 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public boolean has(String word, Path location) {
+	public boolean has(String word, String location) {
 		if (has(word)) {
 			return index.get(word).containsKey(location);
 		}
@@ -106,7 +106,7 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public boolean has(String word, Path location, Integer position) {
+	public boolean has(String word, String location, Integer position) {
 		if (has(word, location)) {
 			return index.get(word).get(location).contains(position);
 		}
@@ -119,16 +119,16 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public Collection<Path> view(String word) {
+	public Collection<String> view(String word) {
 		if (index.get(word) == null) {
-			ArrayList<Path> empty = new ArrayList<Path>();
+			ArrayList<String> empty = new ArrayList<String>();
 			return empty;
 		}
 		return List.copyOf(index.get(word).keySet());
 	}
 
 	@Override
-	public Collection<Integer> view(String word, Path location) {
+	public Collection<Integer> view(String word, String location) {
 		if (!has(word, location)) {
 			ArrayList<Integer> empty = new ArrayList<Integer>();
 			return empty;
@@ -137,16 +137,16 @@ public class WordIndex implements InvertedIndex<Path> {
 	}
 
 	@Override
-	public TreeMap<Path, ? extends Collection<? extends Number>> get(String word) {
+	public TreeMap<String, ? extends Collection<? extends Number>> get(String word) {
 		if (index.get(word) == null) {
 			return null;
 		}
-		TreeMap<Path, ArrayList<Integer>> out = new TreeMap<Path, ArrayList<Integer>>(index.get(word));
+		TreeMap<String, ArrayList<Integer>> out = new TreeMap<String, ArrayList<Integer>>(index.get(word));
 		return out;
 	}
 
 	@Override
-	public ArrayList<Integer> get(String word, Path location) {
+	public ArrayList<Integer> get(String word, String location) {
 		return (ArrayList<Integer>) List.copyOf(index.get(word).get(location));
 	}
 

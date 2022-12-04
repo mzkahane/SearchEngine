@@ -286,14 +286,14 @@ public class PrettyJsonWriter {
 	 * @see #writeArray(Collection)
 	 */
 	public static void writeNestedArrays(
-			Map<Path, ? extends Collection<? extends Number>> map,
+			Map<String, ? extends Collection<? extends Number>> map,
 			Writer writer, int indent) throws IOException {
 		writer.write("{\n");
-		Set<Path> keys = map.keySet();
+		Set<String> keys = map.keySet();
 		var iterator = keys.iterator();
 
 		while (iterator.hasNext()) {
-			Path current = iterator.next();
+			String current = iterator.next();
 			writeQuote(current.toString(), writer, indent+1);
 			writer.append(": ");
 			writeArray(map.get(current), writer, indent+1);
@@ -319,7 +319,7 @@ public class PrettyJsonWriter {
 	 * @see #writeNestedArrays(Map, Writer, int)
 	 */
 	public static void writeNestedArrays(
-			TreeMap<Path, ? extends Collection<? extends Number>> elements, Path path)
+			TreeMap<String, ? extends Collection<? extends Number>> elements, Path path)
 			throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writeNestedArrays(elements, writer, 0);
@@ -336,7 +336,7 @@ public class PrettyJsonWriter {
 	 * @see #writeNestedArrays(Map, Writer, int)
 	 */
 	public static String writeNestedArrays(
-			TreeMap<Path, ? extends Collection<? extends Number>> elements) {
+			TreeMap<String, ? extends Collection<? extends Number>> elements) {
 		try (StringWriter writer = new StringWriter()) {
 			writeNestedArrays(elements, writer, 0);
 			return writer.toString();
@@ -463,7 +463,7 @@ public class PrettyJsonWriter {
 	 * @param indent the level of indent
 	 * @throws IOException when an IO error occurs
 	 */
-	public static void writeIndex(InvertedIndex<Path> index, Path path, int indent) throws IOException {
+	public static void writeIndex(InvertedIndex<String> index, Path path, int indent) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
 			writer.write("{\n");
 			var iterator = index.view().iterator();

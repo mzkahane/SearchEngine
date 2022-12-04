@@ -50,7 +50,7 @@ public class FileFinder {
 		}
 
 		for (int i = 0; i < cleanedWords.size(); i++) {
-			index.add(cleanedWords.get(i), path, i+1);
+			index.add(cleanedWords.get(i), path.toString(), i+1);
 		}
 	}
 
