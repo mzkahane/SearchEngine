@@ -114,9 +114,11 @@ public class HtmlFetcher {
 			} else if (getStatusCode(headers) == 200 && isHtml(headers)) {
 				if (headers.get("Content") != null) {
 					List<String> htmlArray = headers.get("Content");
-					html = htmlArray.get(0);
-					for (int i = 1; i < htmlArray.size(); i++) {
-						html = html.concat("\n").concat(htmlArray.get(i));
+					if (htmlArray.size() > 0) {
+						html = htmlArray.get(0);
+						for (int i = 1; i < htmlArray.size(); i++) {
+							html = html.concat("\n").concat(htmlArray.get(i));
+						}
 					}
 				}
 			}

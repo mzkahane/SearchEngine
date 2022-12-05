@@ -53,6 +53,9 @@ public class WebCrawler {
 		WorkQueue queue = new WorkQueue(threadCount);
 
 		String html = HtmlFetcher.fetch(seed, 3);
+		if (html == null) {
+			return;
+		}
 		String strippedHtml = HtmlCleaner.stripBlockElements(html);
 		HashSet<URL> urls = LinkFinder.uniqueUrls(new URL(seed), strippedHtml);
 
