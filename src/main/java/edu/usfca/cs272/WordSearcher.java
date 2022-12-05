@@ -30,10 +30,6 @@ public class WordSearcher {
 	 * one of the query words.
 	 */
 	private static LinkedHashMap<Path, Integer> findResults(TreeSet<String> query, WordIndex index, boolean exact) {
-		// TODO add more in-line comments on what's going on
-		// TODO merge the top and bottom clauses of the outer if statement because they're pretty similar
-		// checking for if(exact) should happen inside
-		// XXX help me do this
 		LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
 		if (exact) {
 			for (String word : query) {
