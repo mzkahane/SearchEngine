@@ -30,47 +30,28 @@ public class WordSearcher {
 	 * one of the query words.
 	 */
 	private static LinkedHashMap<Path, Integer> findResults(TreeSet<String> query, WordIndex index, boolean exact) {
-		// TODO merge the top and bottom clauses of the outer if statement because they're pretty similar
-		// checking for if(exact) should happen inside
-		// XXX help me do this
 		LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
-		if (exact) {
-			for (String word : query) {
-				if (index.has(word)) {
-					var temp = index.get(word); //get the map of paths -> positons for the word
+		Set<String> indexKeys = index.getKeys();
+		for (String word : query) {
+			for (String key : indexKeys) {
+				if (exact ? index.has(word) : key.startsWith(word)) {
+					String current = exact ? word : key;
+					var temp = index.get(current);
 
 					for (Path location : temp.keySet()) {
 						if (results.containsKey(location)) {
-							// if the location is already in the map, update the count
-							int newCount = results.get(location) + index.size(word, location);
+							int newCount = results.get(location) + index.size(current, location);
 							results.put(location, newCount);
 						} else if (!results.containsKey(location)) {
-							// add that location and the number of appearances to the map of results
-							results.put(location, index.size(word, location));
+							results.put(location, index.size(current, location));
 						}
 					}
 				}
-			}
-		} else {
-			Set<String> indexKeys = index.getKeys(); // contains all the words in the index
-			for (String word : query) {
-				for (String key : indexKeys) {
-					if (key.startsWith(word)) { // if the word from the index starts with the stem of the query...
-						var temp = index.get(key);
-
-						for (Path location : temp.keySet()) {
-							if (results.containsKey(location)) {
-								int newCount = results.get(location) + index.size(key, location);
-								results.put(location, newCount);
-							} else if(!results.containsKey(location)) {
-								results.put(location, index.size(key, location));
-							}
-						}
-					}
+				if (exact) {
+					break;
 				}
 			}
 		}
-
 		return results;
 	}
 
