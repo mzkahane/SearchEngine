@@ -230,7 +230,7 @@ public class ReadWriteLock {
 				log.catching(Level.DEBUG, e);
 				Thread.currentThread().interrupt();
 			}
-			log.debug("Write lock acquired");
+			// FIXME log.debug("Write lock acquired");
 		}
 
 		/**

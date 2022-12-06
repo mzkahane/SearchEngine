@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Uses multithreading to crawl a given URL, following links and redirects, to a certain limit, and fetches the HTML
  * The HTML is then crawled for more links, cleaned, stemmed, and added to the word index
@@ -13,6 +16,10 @@ import java.util.Iterator;
  * @author Matthew Kahane
  */
 public class WebCrawler {
+
+	/** Logger used throughout this class */
+	private static final Logger log = LogManager.getLogger("WebCrawler");
+
 
 	/**
 	 * Cleans and inputs the HTML into the word index with the URL as the location
@@ -25,7 +32,7 @@ public class WebCrawler {
 		// TODO this will handle inputting parsing, cleaning, stemming, and
 		// inputting the html into the index with the url as the location.
 		// should be similar to FileFinder.inputFile
-
+		log.debug("indexing HTML from: " + url);
 		ArrayList<String> cleanedWords = WordCleaner.listStems(html);
 
 		if (cleanedWords.size() > 0) {
@@ -51,6 +58,7 @@ public class WebCrawler {
 	public static void findHTML(String seed, int maxCrawls, ThreadSafeIndex index,
 			int threadCount) throws MalformedURLException {
 		WorkQueue queue = new WorkQueue(threadCount);
+		log.debug("Work queue created with " + threadCount + " threads");
 
 		String html = HtmlFetcher.fetch(seed, 3);
 		if (html == null) {
@@ -58,22 +66,32 @@ public class WebCrawler {
 		}
 		String strippedHtml = HtmlCleaner.stripBlockElements(html);
 		HashSet<URL> urls = LinkFinder.uniqueUrls(new URL(seed), strippedHtml);
+		ArrayList<URL> processed = new ArrayList<URL>();
+		log.debug("Found " + urls.size() + " URLs from seed HTML");
 
-		queue.execute(new Task(new URL(seed), urls, index)); // XXX should I just add seed to urls instead? this will go through it twice..
+		queue.execute(new Task(new URL(seed), urls, index, processed)); // XXX should I just add seed to urls instead? this will go through it twice..
+		processed.add(new URL(seed));
 
 		Iterator<URL> iterator = urls.iterator();
 		while ((iterator.hasNext()) && maxCrawls > 0) {
 			URL current = iterator.next();
-			maxCrawls--;
-			queue.execute(new Task(current, urls, index));
-			/* TODO create workers for the queue on each url
-			 * each worker should do the above, decrementing maxCrawls as each is created
-			 * then stripHtml, convert to unicode(?)
-			 * then clean, parse, and stem remaining text and add them to the index
-			 * the location should be the seed (? or the url from the set?)
-			 */
+			if (!processed.contains(current)) {
+				maxCrawls--;
+				log.debug("Creating task for URL: " + current + "...");
+				processed.add(current);
+				queue.execute(new Task(current, urls, index, processed));
+				//processed.add(current);
+				/* TODO create workers for the queue on each url
+				 * each worker should do the above, decrementing maxCrawls as each is created
+				 * then stripHtml, convert to unicode(?)
+				 * then clean, parse, and stem remaining text and add them to the index
+				 * the location should be the seed (? or the url from the set?)
+				 */
+			}
 		}
+		log.debug("Waitiing for tasks to finish...");
 		queue.join();
+		log.debug("Tasks finished, queue terminated");
 
 	}
 
@@ -93,26 +111,36 @@ public class WebCrawler {
 		/** The index to input the HTML into */
 		private ThreadSafeIndex index;
 
+		private ArrayList<URL> processed;
+
 		/**
 		 * Initializes the Task
 		 *
 		 * @param url the URL to pull the HTML from
 		 * @param urls the set of URLs that will be queued up to crawl
 		 * @param index the index to input the HTML to
+		 * @param processed
 		 */
-		public Task(URL url, HashSet<URL> urls, ThreadSafeIndex index) {
+		public Task(URL url, HashSet<URL> urls, ThreadSafeIndex index, ArrayList<URL> processed) {
 			this.url = url;
 			this.urls = urls;
 			this.index = index;
+			this.processed = processed;
 		}
 
 		@Override
 		public void run() {
 			String html = HtmlFetcher.fetch(url, 3);
+			if (html == null) {
+				return;
+			}
 			String strippedHtml = HtmlCleaner.stripBlockElements(html);
 			HashSet<URL> innerUrls = LinkFinder.uniqueUrls(url, strippedHtml);
-			urls.addAll(innerUrls);
-
+			for (URL newUrl : innerUrls) {
+				if (!processed.contains(newUrl)) {
+					urls.add(newUrl);
+				}
+			}
 			String cleanedHtml = HtmlCleaner.stripHtml(strippedHtml);
 			indexHTML(cleanedHtml, url.toString(), index);
 		}

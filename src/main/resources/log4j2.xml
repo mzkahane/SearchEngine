@@ -25,6 +25,10 @@
 		<Logger name="MultithreadedWordSearcher" level="DEBUG" additivity="false">
 			<AppenderRef ref="FileLog" />
 		</Logger>
+		
+		<Logger name="WebCrawler" level="DEBUG" additivity="false">
+			<AppenderRef ref = "FileLog" />
+		</Logger>
 
 		<Root level="ALL">
 			<AppenderRef ref="Console" level="INFO" />
