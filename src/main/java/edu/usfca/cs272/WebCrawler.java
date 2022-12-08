@@ -65,12 +65,13 @@ public class WebCrawler {
 			return;
 		}
 		String strippedHtml = HtmlCleaner.stripBlockElements(html);
-		HashSet<URL> urls = LinkFinder.uniqueUrls(new URL(seed), strippedHtml);
+		ArrayList<URL> urls = new ArrayList<URL>();
+		LinkFinder.findUrls(new URL(seed), strippedHtml, urls);
 		ArrayList<URL> processed = new ArrayList<URL>();
 		log.debug("Found " + urls.size() + " URLs from seed HTML");
 
+		processed.add(new URL(seed)); // XXX switched these, does it work?
 		queue.execute(new Task(new URL(seed), urls, index, processed)); // XXX should I just add seed to urls instead? this will go through it twice..
-		processed.add(new URL(seed));
 
 		Iterator<URL> iterator = urls.iterator();
 		while ((iterator.hasNext()) && maxCrawls > 0) {
@@ -106,7 +107,7 @@ public class WebCrawler {
 		private URL url;
 
 		/** The set of URLs that will be queued up to crawl */
-		private HashSet<URL> urls;
+		private ArrayList<URL> urls;
 
 		/** The index to input the HTML into */
 		private ThreadSafeIndex index;
@@ -121,7 +122,7 @@ public class WebCrawler {
 		 * @param index the index to input the HTML to
 		 * @param processed
 		 */
-		public Task(URL url, HashSet<URL> urls, ThreadSafeIndex index, ArrayList<URL> processed) {
+		public Task(URL url, ArrayList<URL> urls, ThreadSafeIndex index, ArrayList<URL> processed) {
 			this.url = url;
 			this.urls = urls;
 			this.index = index;

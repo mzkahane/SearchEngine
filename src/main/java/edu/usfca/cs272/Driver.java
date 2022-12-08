@@ -86,7 +86,7 @@ public class Driver {
 			if (seed != null) {
 				try {
 					// TODO maxCrawls-1 because the seed counts as one of the crawls?
-					WebCrawler.findHTML(seed, maxCrawls, (ThreadSafeIndex) index, threadCount);
+					WebCrawler.findHTML(seed, maxCrawls-1, (ThreadSafeIndex) index, threadCount);
 				} catch (MalformedURLException e) {
 					System.out.println("The URL :" + seed + "is malformed");
 					log.catching(e);
