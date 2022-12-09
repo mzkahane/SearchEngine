@@ -87,6 +87,9 @@ public class MultithreadedFileFinder extends FileFinder {
 	 *
 	 * @author Matthew Kahane
 	 */
+	// TODO Contention - this impl will be high contention
+	// - better pattern would be to create a new local index inside this thread
+	// - only at the very end, try to merge the thread-local index into the "main" index.
 	private static class Task implements Runnable {
 
 		/** the text path to input into the index */

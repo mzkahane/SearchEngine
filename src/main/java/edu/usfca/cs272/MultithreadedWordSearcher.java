@@ -23,6 +23,8 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Matthew Kahane
  */
+// TODO: you're already extending WordSearcher, so you don't need be copying and pasting
+// code between the 2. Means you can call super.search or super.findResults
 public class MultithreadedWordSearcher extends WordSearcher {
 
 	/** Logger used throughout this class */
@@ -103,6 +105,9 @@ public class MultithreadedWordSearcher extends WordSearcher {
 
 		@Override
 		public void run() {
+		// TODO here you want to call the existing single-threaded method in WordSearcher
+		// if you don't already have a method that processes a single-line query, then try refactoring so that you do
+			// TODO should be calling super.METHOD
 			LinkedHashMap<Path, Integer> results = new LinkedHashMap<>();
 			if (exact) {
 				for (String word : query) {

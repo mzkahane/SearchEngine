@@ -31,6 +31,12 @@ public class ThreadSafeIndex extends WordIndex{
 	}
 
 	@Override
+	// TODO:
+	// try {
+	//   do stuff;
+	// } finally {
+	//	lock.write().unlock();
+	// }
 	public void add (String word, Path location, ArrayList<Integer> positions) {
 		lock.write().lock();
 		super.add(word, location, positions);
