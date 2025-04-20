@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -148,30 +150,55 @@ public class MultithreadedWordSearcher extends WordSearcher {
 				int appearances = results.get(location);
 				temp.put("count", String.format("%d", appearances));
 				temp.put("score", String.format("%.8f", (double) appearances/index.getWordCount(location.toString())));
-				temp.put("where", ('"' + location + '"'));
+				temp.put("where", '"' + location + '"');
 
-				int j = scoredResults.size();
-				for (int i = 0; i < scoredResults.size(); i++) {
-					if (Float.parseFloat(scoredResults.get(i).get("score")) < Float.parseFloat(temp.get("score"))) {
-						j = i;
-						break;
-					} else if (Float.parseFloat(scoredResults.get(i).get("score")) == Float.parseFloat(temp.get("score"))) {
-						if (Float.parseFloat(scoredResults.get(i).get("count")) < Float.parseFloat(temp.get("count"))) {
-							j = i;
-							break;
-						} else if (Float.parseFloat(scoredResults.get(i).get("count")) > Float.parseFloat(temp.get("count"))) {
-							j = i+1;
-							break;
-						} else if (scoredResults.get(i).get("where").compareToIgnoreCase(temp.get("where")) < 0) {
-							j = i+1;
-							break;
-						} else {
-							j = i;
-							break;
-						}
+//				int j = scoredResults.size();
+//				for (int i = 0; i < scoredResults.size(); i++) {
+//					if (Float.parseFloat(scoredResults.get(i).get("score")) < Float.parseFloat(temp.get("score"))) {
+//						j = i;
+//						break;
+//					} else if (Float.parseFloat(scoredResults.get(i).get("score")) == Float.parseFloat(temp.get("score"))) {
+//						if (Float.parseFloat(scoredResults.get(i).get("count")) < Float.parseFloat(temp.get("count"))) {
+//							j = i;
+//							break;
+//						} else if (Float.parseFloat(scoredResults.get(i).get("count")) > Float.parseFloat(temp.get("count"))) {
+//							j = i+1;
+//							break;
+//						} else if (scoredResults.get(i).get("where").compareToIgnoreCase(temp.get("where")) < 0) {
+//							j = i+1;
+//							break;
+//						} else {
+//							j = i;
+//							break;
+//						}
+//					}
+//				}
+//				scoredResults.add(j, temp);
+				Comparator<LinkedHashMap<String, String>> scoreComparator = (a, b) -> {
+			    // Primary sort: score descending
+			    int scoreCompare = Float.compare(
+			        Float.parseFloat(b.get("score")),
+			        Float.parseFloat(a.get("score"))
+			    );
+			    if (scoreCompare != 0) {
+						return scoreCompare;
 					}
-				}
-				scoredResults.add(j, temp);
+
+			    // Secondary sort: count descending
+			    int countCompare = Integer.compare(
+			        Integer.parseInt(b.get("count")),
+			        Integer.parseInt(a.get("count"))
+			    );
+			    if (countCompare != 0) {
+						return countCompare;
+					}
+
+			    // Tertiary sort: path ascending
+			    return a.get("where").compareToIgnoreCase(b.get("where"));
+			};
+
+				scoredResults.add(temp);
+				Collections.sort(scoredResults, scoreComparator);
 				log.debug("All results scored");
 			}
 			String joinedQuery = String.join(" ", query);
